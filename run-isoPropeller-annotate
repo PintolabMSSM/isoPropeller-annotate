@@ -109,7 +109,7 @@ if [ -z "$PREFIX" ];
 then
   cat << EOF
 
-   Usage: run-post-niap-merge -s <TARGET> -i <PREFIX>
+   Usage: run-isoPropeller-annotate -s <TARGET> -i <PREFIX>
 
    Arguments:
     -i <string>
@@ -150,7 +150,7 @@ if [ -n "$LSB_JOBID" ]
 then
    timestamp="${timestamp}_lsf${LSB_JOBID}"
 fi
-echo "## Starting post-niap analysis with the following parameters:" > pipeline_${timestamp}.log
+echo "## Starting isoPropeller-annotate analysis with the following parameters:" > pipeline_${timestamp}.log
 echo "   File prefix:      $PREFIX"         >> pipeline_${timestamp}.log
 echo "   Config file:      $CONFIGFILE"     >> pipeline_${timestamp}.log
 
@@ -174,7 +174,7 @@ source activate snakemake
 module load proxies
 
 # Add the bin folder with any external scripts that may be called from the pipeline to the path
-export PATH="$GIT_REPODIR/sm_post-niap-merge/bin/:$PATH"
+export PATH="$GIT_REPODIR/isoPropeller-annotate/bin/:$PATH"
 
 
 ############################
@@ -189,7 +189,7 @@ ${TOUCH} \
 --use-conda \
 --conda-frontend mamba \
 --conda-prefix   ${CONDA_WORKDIR} \
---snakefile      ${GIT_REPODIR}/sm_post-niap-merge/workflow/Snakefile \
+--snakefile      ${GIT_REPODIR}/isoPropeller-annotate/workflow/Snakefile \
 --cores          ${JOB_NCPUS} \
 --config         prefix=${PREFIX} --
 ${TASK}"
@@ -204,9 +204,9 @@ $cmd >>  pipeline_${timestamp}.log 2>&1
 if [ $? -eq 0 ]
 then
    sleep 5
-   echo -e "\n#########################################\n# POST NIAP PIPELINE ENDED SUCCESSFULLY #\n#########################################\n" >> pipeline_${timestamp}.log;
+   echo -e "\n#########################################\n# PIPELINE ENDED SUCCESSFULLY #\n#########################################\n" >> pipeline_${timestamp}.log;
 else
    sleep 5
-   echo -e "\n########################################\n# POST NIAP PIPELINE ENDED WITH ERRORS #\n########################################\n" >> pipeline_${timestamp}.log;
+   echo -e "\n########################################\n# PIPELINE ENDED WITH ERRORS #\n########################################\n" >> pipeline_${timestamp}.log;
 fi
 

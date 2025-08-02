@@ -15,7 +15,7 @@ min_version("7.14")
 envvars:
    "GIT_REPODIR"
 
-configfile: ''.join([os.environ['GIT_REPODIR'], "/sm_post-niap-merge/config/config.yaml"])
+configfile: ''.join([os.environ['GIT_REPODIR'], "/isoPropeller-annotate/config/config.yaml"])
 
 # Set path variables to pass to bash scripts
 shell_path       = expand("{util}:{ngs}:{igb}:{iso}:{lsf}:{sq3}/cDNA_Cupcake/sequence/:{sq3}cDNA_Cupcake/annotation/", 

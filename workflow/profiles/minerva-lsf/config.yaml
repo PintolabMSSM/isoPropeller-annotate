@@ -1,0 +1,21 @@
+# --- Define basic settings --- #
+executor:         lsf
+scheduler:        greedy
+jobs:             100
+latency-wait:     5
+rerun-incomplete: true
+use-singularity:  true
+use-conda:        true
+retries:          1
+
+# --- Define default resources for all rules --- #
+default-resources:
+  lsf_queue:    "express"
+  lsf_project:  "acc_PVI"
+  mem_mb:       25000
+  runtime:      720
+  threads:      4
+  span:         "span[hosts=1]"
+  lsf_extra:    "-oo clusterlogs/%J.OU"
+
+# --- Define rule-specific resources --- #
