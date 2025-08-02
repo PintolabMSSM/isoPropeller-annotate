@@ -1,8 +1,8 @@
-# sm_post-niap-merge
-Snakemake pipeline to run a series of isoform analyses after performing `NIAP_merge.pl` across multiple samples. The starting point for the pipeline is a `.gtf` file produced by NIAP_merge.pl, and an `isoform count matrix` with the raw read counts for each isoform (rows) in all samples (columns).
+# isoPropeller-annotate
+Snakemake pipeline to annotate isoforms identified by the isoPropeller-collapse pipeline. The starting point for the pipeline is a `.gtf` isoform file, and an `isoform count matrix` with the raw read counts for each isoform (rows) in all samples (columns).
 
 ## Installation
-Installation of the external software packages required by post-niap-merge is largely handled by the pipeline itself, however there are a few prerequisites that need to be in place before running the pipeline. First, the pipeline requires that a conda environment named `snakemake` is present in your environment. This can be installed on the Mount Sinai 'Minerva' cluster using the following commands. 
+Installation of the external software packages required by isoPropeller-collapse is largely handled by the pipeline itself, however there are a few prerequisites that need to be in place before running the pipeline. First, the pipeline requires that a conda environment named `snakemake` is present in your environment. This can be installed on the Mount Sinai 'Minerva' cluster using the following commands. 
 
 ```bash
 module purge all
@@ -32,11 +32,11 @@ minerva_queue_lsf : git clone git@bitbucket.org:hvbakel/minerva-queue-lsf.git
 ```
 The `minerva_queue_lsf` repository provides the `submitjob` script required for the pfamscan and interpro scan tasks in the pipeline. Both these tasks partition the isoform sequences in chunks for parallel processing on the 'Minerva' compute cluster, which uses the LSF queueing system. Other environments will require a modification of the submitjob script.
 
-## Running the post-niap-merge pipeline
-The `sm_post-niap-merge` pipeline is developed in Snakemake and uses a standardized structure that is expected by frequent Snakemake users and allows for easy deployment in modular workflows. For convenience we also provide a `run-post-niap-merge` wrapper script that simplifies execution of the pipeline. The wrapper script expects three input files per analysis with the following standardized file name convention:
+## Running the isoPropeller-collapse pipeline
+The `isoPropeller-collapse` pipeline is developed in Snakemake and uses a standardized structure that is expected by frequent Snakemake users and allows for easy deployment in modular workflows. For convenience we also provide a `run-isoPropeller-collapse` wrapper script that simplifies execution of the pipeline. The wrapper script expects three input files per analysis with the following standardized file name convention:
 
 ```
-<PREFIX>.gtf     : gtf file, produced by NIAP_merge.pl
+<PREFIX>.gtf     : gtf file, produced by isoPropeller-collapse
 <PREFIX>_exp_renamed.txt  : raw flnc read counts for each isoform (rows) in all samples (columns)
 ```
 
@@ -53,16 +53,16 @@ MAP_chr1_1.3   0        0              4              0
 ```
 
 #### Starting the pipeline
-We recommend organizing each post-niap-merge analysis in separate folder. When ready, the Snakemake pipeline wrapper script can be used as follows:
+We recommend organizing each isoPropeller-collapse analysis in separate folder. When ready, the Snakemake pipeline wrapper script can be used as follows:
 
 ```
-run-post-niap-merge -i <PREFIX>
+run-isoPropeller-collapse -i <PREFIX>
 ```
 
-#### Arguments for the run-post-niap-merge wrapper script
+#### Arguments for the run-isoPropeller-collapse wrapper script
 
 ```
-   Usage: run-post-niap-merge -i <PREFIX>
+   Usage: run-isoPropeller-collapse -i <PREFIX>
 
    Arguments:
     -i <string>
@@ -75,7 +75,7 @@ run-post-niap-merge -i <PREFIX>
 
 
 ## Overview of pipeline tasks and outputs
-The post-niap-merge pipeline is organized as a series of tasks, each of which has their own output folder. An overview of each tasks and the outputs it produces is provided below.
+The isoPropeller-collapse pipeline is organized as a series of tasks, each of which has their own output folder. An overview of each tasks and the outputs it produces is provided below.
 
 ### 01_sqanti3
 
@@ -111,7 +111,7 @@ As part of this task, several patched output files are produced:
 * **{prefix}_stats_novelgene-overlaps-reclassify.txt** 
 
 ### 03_isoform_counts
-This task is a stub from the equivalent NIAP_merge.pl. Since the count matrix is provided as an input to the sm_post-niap-merge pipeline we simply copy the count matrix file here.
+Since the count matrix is provided as an input to the isoPropeller-collapse pipeline we simply copy the count matrix file here.
 ### 04_isoform_terminal_exons_in_segdups
 This pipeline task evaluates whether there are isoforms who have one, two, three, or four terminal exons mapping in a segmental duplication and where the terminal intron spans one or more other genes. These isoforms are candidates for potentially mis-mapped terminal exons due to segmental duplications, which can cause spurious gene fusions / read-through annotations. The task produces the following outputs:
 
@@ -170,9 +170,9 @@ This task compares all isoforms with all isoforms from the reference and annotat
 An additional output file is generated with isoform-level classification information named `{prefix}_reference_refined.txt` , containing the following columns:
 
 - transcript_id : The transcript ID
-- status: The isoform status as classified by NIAP
-- niap_structural_category: The isform structural category
-- niap_structural_subcategory: The isoform structural subcategory
+- status: The isoform status as classified by isoPropeller
+- isoPropeller_structural_category: The isform structural category
+- isoPropeller_structural_subcategory: The isoform structural subcategory
 
 ### 10_nmd_poison_exons
 This task identifies isoforms that are likely targets for nonsense-mediated decay (NMD) as well as poison exons. Poison exons are naturally occurring, highly conserved alternative exons that contain a premature termination codon. Inclusion of a poison exon in a transcript targets the transcript for NMD, decreasing the amount of protein produced. 
@@ -185,12 +185,12 @@ This task runs a [transdecoder](https://github.com/TransDecoder/TransDecoder/wik
 This task produces an extended GTF track file `{prefix}_patched_extra_stopfix.gtf` for squanti_patched isoforms (task 02). The CDS records in this GTF file have been modified to exclude the stop codon to ensure the file is compatible with `IsoswitchAnalyzeR`. The GTF file also contains the following extra attributes that are needed for e.g. a VEP analysis:
 
 * transcript_id: The unique PBID assigned to the transcript
-* gene_id: The associated gene ID(s) assigned by the NIAP pipeline. If multiple gene IDs are assigned to the same isoform they are separated by ':' (e.g. ENSG01:ENSG02)
-* gene_name: The associated gene name(s) assigned by the NIAP pipelines. If multiple gene names are assigned to the same isoform they are separated by ':' (e.g. geneA:geneB)
+* gene_id: The associated gene ID(s) assigned by isoPropeller. If multiple gene IDs are assigned to the same isoform they are separated by ':' (e.g. ENSG01:ENSG02)
+* gene_name: The associated gene name(s) assigned by isoPropeller. If multiple gene names are assigned to the same isoform they are separated by ':' (e.g. geneA:geneB)
 * gene_biotype: The assigned gene biotypes(s) derived from the associated gene ID(s). If multiple biotypes are assigned to the same isoform they are assigned
-* niap_structural_category: The structural category assigned by NIAP.
-* niap_structural_subcategory: The structural subcategory assigned by NIAP.
-* cds_type: The CDS type assigned by NIAP.
+* isoPropeller_structural_category: The structural category assigned by isoPropeller.
+* isoPropeller_structural_subcategory: The structural subcategory assigned by isoPropeller.
+* cds_type: The CDS type assigned by isoPropeller.
 
 Finally, the 12_tracks folder also contains per-sample tracks that are derived from the main  `{prefix}_patched_extra_stopfix.gtf` file after restricting to isoforms present in each sample. The selection is done by selecting isoforms with a count greater than zero in the flcount matrix (task 03).
 
