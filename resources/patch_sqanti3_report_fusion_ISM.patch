@@ -1,0 +1,17 @@
+--- /hpc/users/pintod02/opt/SQANTI3/current/utilities/report_qc/SQANTI3_report.R	2023-02-05 06:52:11.479095000 -0500
++++ ./SQANTI3_report.R	2023-02-27 21:17:45.578154616 -0500
+@@ -125,10 +125,10 @@
+ data.class = read.table(class.file, header=T, as.is=T, sep="\t")
+ rownames(data.class) <- data.class$isoform
+ 
+-xaxislevelsF1 <- c("full-splice_match","incomplete-splice_match","novel_in_catalog","novel_not_in_catalog", "genic","antisense","fusion","intergenic","genic_intron");
+-xaxislabelsF1 <- c("FSM", "ISM", "NIC", "NNC", "Genic\nGenomic",  "Antisense", "Fusion","Intergenic", "Genic\nIntron")
+-subc.levels=c("alternative_3end",'alternative_3end5end', "alternative_5end","reference_match", "3prime_fragment","internal_fragment", "5prime_fragment","combination_of_known_junctions", "combination_of_known_splicesites", "intron_retention","no_combination_of_known_junctions", "mono-exon_by_intron_retention", "at_least_one_novel_splicesite", "mono-exon", "multi-exon")
+-subc.labels=c("Alternative 3'end", "Alternative 3'5'end", "Alterantive 5'end", "Reference match", "3' fragment", "Internal fragment", "5' fragment", "Comb. of annot. junctions", "Comb. of annot. splice sites", "Intron retention", "Not comb. of annot. junctions", "Mono-exon by intron ret.", "At least 1 annot. don./accept.", "Mono-exon", "Multi-exon")
++xaxislevelsF1 <- c("full-splice_match","novel_in_catalog","novel_not_in_catalog", "genic","antisense","fusion_known","fusion_novel","intergenic","genic_intron");
++xaxislabelsF1 <- c("FSM", "NIC", "NNC", "Genic\nGenomic",  "Antisense", "Fusion\nKnown","Fusion\nNovel","Intergenic", "Genic\nIntron")
++subc.levels=c("alternative_3end",'alternative_3end5end', "alternative_5end","reference_match", "combination_of_known_junctions", "combination_of_known_splicesites", "intron_retention","no_combination_of_known_junctions", "mono-exon_by_intron_retention", "at_least_one_novel_splicesite", "mono-exon", "multi-exon")
++subc.labels=c("Alternative 3'end", "Alternative 3'5'end", "Alterantive 5'end", "Reference match", "Comb. of annot. junctions", "Comb. of annot. splice sites", "Intron retention", "Not comb. of annot. junctions", "Mono-exon by intron ret.", "At least 1 annot. don./accept.", "Mono-exon", "Multi-exon")
+ coding.levels=c("coding", "non_coding")
+ coding.labels=c("Coding", "Non coding")
+ 

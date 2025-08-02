@@ -1,0 +1,636 @@
+#!/usr/bin/env snakemake
+
+##########
+# IMPORT #
+##########
+
+import os
+from snakemake.utils import min_version
+min_version("7.14")
+
+##########
+# CONFIG #
+##########
+
+envvars:
+   "GIT_REPODIR"
+
+configfile: ''.join([os.environ['GIT_REPODIR'], "/sm_post-niap-merge/config/config.yaml"])
+
+# Set path variables to pass to bash scripts
+shell_path       = expand("{util}:{ngs}:{igb}:{iso}:{lsf}:{sq3}/cDNA_Cupcake/sequence/:{sq3}cDNA_Cupcake/annotation/", 
+                          util=config["utility_path"],  ngs=config["ngs_tools_path"],   igb=config["track_tools_path"],  
+                          iso=config["isoseq_pipeline_path"],  sq3=config["sqanti_path"], lsf=config["minerva_queue_lsf_path"])
+shell_maptools   = expand("{maptools}/NIAP/script/:{maptools}/ASEF/script/:{maptools}/poison_exon/script/:{maptools}/NIAP_classification_conversion/script/:{maptools}/CPAT_conversion/script/:{maptools}/reconstructed_locus/script/:{maptools}/CDS_prediction/script/",
+                          maptools=config["isoseq_map_analysis_path"])
+shell_perl5lib   = config["utility_perl5lib"]
+
+
+####################### 
+## CONDITIONAL RULES ##
+#######################
+
+final_output = []
+
+# Include all selected conditional tools
+if( "CONDITIONAL" in config ):
+	for conditional_tool in config["CONDITIONAL"]:
+		include: ("rules/conditional/" + conditional_tool + ".smk")
+
+# Include all conditional outputs
+if( "CONDITIONAL" in config ):
+	if("pogo" in config["CONDITIONAL"]):
+		final_output.append( expand("17_PoGo/{prefix}_PoGo_mm1_1MM.bed", prefix=config["prefix"]) )
+
+
+#########
+# RULES #
+#########
+
+rule all:
+   input: 
+      expand("01_sqanti3/{prefix}_classification.txt", prefix=config["prefix"]),
+      expand("02_sqanti3_patched/{prefix}_patched_classification.txt", prefix=config["prefix"]),
+      expand("02_sqanti3_patched/{prefix}_patched_SQANTI3_report.pdf", prefix=config["prefix"]),
+      expand("03_isoform_counts/{prefix}_isoform-counts.txt", prefix=config["prefix"]),
+      expand("04_isoform_terminal_exons_in_segdups/{prefix}_mismaplocus_regions.txt", prefix=config["prefix"]),
+      expand("05_cpatv3/{prefix}_corrected.cpatv3p18.ORF_prob.tsv", prefix=config["prefix"]),
+      expand("08_genomic_element_overlaps/{prefix}_genomic_element_overlaps.txt", prefix=config["prefix"]),
+      expand("08_genomic_element_overlaps/{prefix}_SV_overlaps.txt", prefix=config["prefix"]),
+      expand("09_niap_asef/{prefix}_reference.gtf", prefix=config["prefix"]),
+      expand("09_niap_asef/{prefix}_reference_transcript.txt", prefix=config["prefix"]),
+      expand("09_niap_asef/{prefix}_reference_gene.txt", prefix=config["prefix"]),
+      expand("10_nmd_poison_exons/{prefix}_reference_reclocus_CDS_nmd_sj.txt", prefix=config["prefix"]),
+      expand("11_transdecoder/{prefix}_transdecoder.check", prefix=config["prefix"]),
+      expand("12_tracks/{prefix}_reference_reclocus_CDS_extra.gtf", prefix=config["prefix"]),
+      expand("13_splicechains/{prefix}_patched_splicechains.txt", prefix=config["prefix"]),
+      expand("14_DEG/{prefix}_limma.checkpoint", prefix=config["prefix"]),
+      expand("06_interpro/{prefix}_jobs-submitted.check", prefix=config["prefix"]),
+      expand("07_pfam/{prefix}_jobs-submitted.check", prefix=config["prefix"]),
+      expand("15_collapsed-ORFs/{prefix}_reference_reclocus_CDS_aa_clust_header_generic.faa", prefix=config["prefix"]),
+      expand("16_isoformswitchanalyzer_inputs/{prefix}_exp_isoforms-nt.fasta", prefix=config["prefix"]),
+      final_output
+
+#-------------#
+# RUN SQANTI3 #
+#-------------#
+rule sqanti3:
+   message: "Run sqanti3 on the input bed file"
+   input:
+      isocollapse_gtf     = "{prefix}.gtf"
+   output:
+      sq3_classification  = "01_sqanti3/{prefix}_classification.txt",
+      sq3_gtf             = "01_sqanti3/{prefix}_corrected.gtf.cds.gff",
+      sq3_junctions       = "01_sqanti3/{prefix}_junctions.txt",
+      sq3_params          = "01_sqanti3/{prefix}.params.txt",
+      sq3_fasta           = "01_sqanti3/{prefix}_corrected.fasta",
+      sq3_faa             = "01_sqanti3/{prefix}_corrected.faa"
+   threads:
+      24
+   conda:
+      "SQANTI3.env"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      output_dir          = directory("01_sqanti3"),
+      sqanti3_qc          = expand("{sq3}/sqanti3_qc.py", sq3=config["sqanti_path"]),
+      cdna_cupcake_path   = config["cdna_cupcake_path"],
+      prefix              = config["prefix"],
+      refgenome_fasta     = config["refgenome_fasta"],
+      refgenome_gtf       = config["refgenome_gtf"],
+      polya_motifs        = config["polya_motifs"],
+      polya_bed           = config["polya_bed"],
+      cage_peaks_allmerge = config["cage_peaks_allmerge"],
+      intron_coverage     = config["intron_coverage"]
+   resources:
+      tmpdir              = config["tmpdir"]
+   log:
+      out   = "logs/01_sqanti3_{prefix}.log",
+      build = "logs/01_cDNA-cupcake_build_{prefix}.log"
+   script:
+      "scripts/run-sqanti3.sh"
+
+
+#------------------------#
+# CORRECT SQANTI3 OUTPUT #
+#------------------------#
+rule sqanti3_patching:
+   message: "Patch sqanti3 output by collapsing novelgenes and fixing cage/polya distances"
+   input:
+      sq3_classification  = "01_sqanti3/{prefix}_classification.txt",
+      sq3_gtf             = "01_sqanti3/{prefix}_corrected.gtf.cds.gff"
+   output:
+      sq3_classpatched    = "02_sqanti3_patched/{prefix}_patched_classification.txt",
+      gtf_classpatched    = "02_sqanti3_patched/{prefix}_patched.gtf",
+      gff_classpatched    = "02_sqanti3_patched/{prefix}_patched.gff",
+      bed_classpatched    = "02_sqanti3_patched/{prefix}_patched.bed",
+      stats_reclassify    = "02_sqanti3_patched/{prefix}_stats_sqanti-reclassify.txt",
+      stats_novelgene     = "02_sqanti3_patched/{prefix}_stats_novelgene-overlaps-reclassify.txt"
+   threads:
+      2
+   conda:
+      "SQANTI3.env"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      path_maptools       = shell_maptools,
+      output_dir          = directory("02_sqanti3_patched"),
+      prefix              = config["prefix"],
+      refgenome_fasta     = config["refgenome_fasta"],
+      refgenome_gtf       = config["refgenome_gtf"],
+      refgenome_anno      = config["refgenome_anno"],
+      polya_bed           = config["polya_bed"],
+      cage_peaks_allmerge = config["cage_peaks_allmerge"],
+      intron_coverage     = config["intron_coverage"]
+   resources:
+      tmpdir              = config["tmpdir"]
+   log:
+      out   = "logs/02_sqanti3_patching_{prefix}.log"
+   script:
+      "scripts/patch-sqanti3-output.sh"
+
+
+#-------------------------------------#
+# RERUN SQANTI REPORT ON PATCHED DATA #
+#-------------------------------------#
+rule sqanti3_patch_report:
+   message: "Generate sqanti3 reports on patched data"
+   input:
+      sq3_classification  = "02_sqanti3_patched/{prefix}_patched_classification.txt",
+      sq3_junctions       = "01_sqanti3/{prefix}_junctions.txt",
+      sq3_params          = "01_sqanti3/{prefix}.params.txt"
+   output:
+      sq3_pdf_report      = "02_sqanti3_patched/{prefix}_patched_SQANTI3_report.pdf"
+   threads:
+      2
+   conda:
+      "SQANTI3.env"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      output_dir          = directory("02_sqanti3_patched"),
+      sq3_fusion_patch    = os.path.join(workflow.basedir, "../resources/patch_sqanti3_report_fusion.patch"),
+      prefix              = config["prefix"],
+      sq3_path            = config["sqanti_path"]
+   resources:
+      tmpdir              = config["tmpdir"]
+   log:
+      out   = "logs/02_sqanti3_patch_report_{prefix}.log"
+   script:
+      "scripts/run-sqanti3-report.sh"
+
+
+#--------------------------#
+# GET ISOFORM COUNT MATRIX #
+#--------------------------#
+rule isoform_count_matrix:
+   message: "Copy the count matrix from the isoseq collapse"
+   input:
+      niap_merge_counts  = "{prefix}.counts"
+   output:
+      iso_count_matrix    = "03_isoform_counts/{prefix}_isoform-counts.txt"
+   threads:
+      2
+   conda:
+      "envs/base-packages.yaml"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      output_dir          = directory("03_isoform_counts"),
+      prefix              = config["prefix"]
+   resources:
+      tmpdir              = config["tmpdir"]
+   log:
+      out   = "logs/03_isoform_count_matrix_{prefix}.log"
+   script:
+      "scripts/get-isoform-count-matrix.sh"
+
+
+#----------------------------------------------------------#
+# IDENTIFY ISOFORMS WITH TERMINAL EXONS MAPPING IN SEGDUPS #
+#----------------------------------------------------------#
+rule isoforms_with_terminal_exons_in_segdups:
+   message: "Identify isoforms with terminal exons in segdups"
+   input:
+      sq3_gtf             = "01_sqanti3/{prefix}_corrected.gtf.cds.gff"
+   output:
+      mismapped_txt       = "04_isoform_terminal_exons_in_segdups/{prefix}_mismapped-all.txt",
+      mismapped_bed       = "04_isoform_terminal_exons_in_segdups/{prefix}_mismapped-all.bed",
+      mismapped_regions   = "04_isoform_terminal_exons_in_segdups/{prefix}_mismaplocus_regions.txt"
+   threads:
+      2
+   conda:
+      "envs/base-packages.yaml"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      output_dir          = directory("04_isoform_terminal_exons_in_segdups"),
+      prefix              = config["prefix"],
+      refgenome_gtf       = config["refgenome_gtf"],
+      segdups_bed         = config["segdups_bed"]
+   resources:
+      tmpdir              = config["tmpdir"]
+   log:
+      out   = "logs/04_isoform_terminal_exons_in_segdups_{prefix}.log"
+   script:
+      "scripts/get-isoforms-with-terminal-segdup-exons.sh"
+
+
+#----------------------------#
+# ANALYZE ISOFORMS WITH CPAT #
+#----------------------------#
+rule run_cpat3:
+   message: "Run cpat3"
+   input:
+      sq3_gtf             = "01_sqanti3/{prefix}_corrected.gtf.cds.gff"
+   output:
+      cpat_prob_seqs      = "05_cpatv3/{prefix}_corrected.cpatv3p18.ORF_seqs.fa",
+      cpat_prob           = "05_cpatv3/{prefix}_corrected.cpatv3p18.ORF_prob.tsv",
+      cpat_prob_best      = "05_cpatv3/{prefix}_corrected.cpatv3p18.ORF_prob.best.tsv",
+      cpat_prob_no_orf    = "05_cpatv3/{prefix}_corrected.cpatv3p18.no_ORF.txt",
+      cpat_prob_log       = "05_cpatv3/{prefix}_corrected.cpatv3p18.log",
+      cpat_leng_seqs      = "05_cpatv3/{prefix}_corrected.cpatv3l18.ORF_seqs.fa",
+      cpat_leng           = "05_cpatv3/{prefix}_corrected.cpatv3l18.ORF_prob.tsv",
+      cpat_leng_best      = "05_cpatv3/{prefix}_corrected.cpatv3l18.ORF_prob.best.tsv",
+      cpat_leng_no_orf    = "05_cpatv3/{prefix}_corrected.cpatv3l18.no_ORF.txt",
+      cpat_leng_log       = "05_cpatv3/{prefix}_corrected.cpatv3l18.log"
+   threads:
+      4
+   conda:
+      "envs/cpat3.yaml"
+   params:
+      path                = shell_path,
+      path_maptools       = shell_maptools, 
+      perl5lib            = shell_perl5lib,
+      output_dir          = directory("05_cpatv3"),
+      prefix              = config["prefix"],
+      cpat_prebuilt_logit = config["cpat_prebuilt_logit"],
+      cpat_prebuilt_hex   = config["cpat_prebuilt_hex"],
+      minorf_cpat3        = config["minorf_cpat3"],
+      refgenome_fasta     = config["refgenome_fasta"]
+   resources:
+      tmpdir              = config["tmpdir"]
+   log:
+      out   = "logs/05_cpatv3_{prefix}.log"
+   script:
+      "scripts/run-cpat3.sh"
+
+
+#------------------------------------#
+# ANALYZE ISOFORMS WITH INTERPROSCAN #
+#------------------------------------#
+rule run_interproscan:
+   message: "Launch interproscan jobs"
+   input:
+      reclocus_cds_aa     = "09_niap_asef/{prefix}_reference_reclocus_CDS_aa.fa"
+   output:
+      interpro_launched   = "06_interpro/{prefix}_jobs-submitted.check"
+   threads:
+      2
+   conda:
+      "envs/base-packages.yaml"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      output_dir          = directory("06_interpro"),
+      prefix              = config["prefix"],
+      lsf_allocation      = config["project_allocation"]
+   resources:
+      tmpdir              = config["tmpdir"]
+   log:
+      out   = "logs/06_interproscan_{prefix}.log"
+   script:
+      "scripts/run-interproscan.sh"
+
+#--------------------------------#
+# ANALYZE ISOFORMS WITH PFAMSCAN #
+#--------------------------------#
+rule run_pfamscan:
+   message: "Launch pfamscan jobs"
+   input:
+      reclocus_cds_aa     = "09_niap_asef/{prefix}_reference_reclocus_CDS_aa.fa"
+   output:
+      pfam_launched       = "07_pfam/{prefix}_jobs-submitted.check"
+   threads:
+      2
+   conda:
+      "envs/base-packages.yaml"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      output_dir          = directory("07_pfam"),
+      prefix              = config["prefix"],
+      lsf_allocation      = config["project_allocation"]
+   resources:
+      tmpdir              = config["tmpdir"]
+   log:
+      out   = "logs/07_pfamscan_{prefix}.log"
+   script:
+      "scripts/run-pfamscan.sh"
+
+
+#----------------------------------------#
+# PERFORM OVERLAPS WITH GENOMIC ELEMENTS #
+#----------------------------------------#
+rule run_element_overlaps:
+   message: "Process overlaps with genomic elements"
+   input:
+      sq3_gtf             = "01_sqanti3/{prefix}_corrected.gtf.cds.gff"
+   output:
+      combined_elements   = "08_genomic_element_overlaps/{prefix}_genomic_element_overlaps.txt",
+      sv_elements         = "08_genomic_element_overlaps/{prefix}_SV_overlaps.txt"
+   threads:
+      2
+   conda:
+      "envs/base-packages.yaml"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      output_dir          = directory("08_genomic_element_overlaps"),
+      prefix              = config["prefix"],
+      rmsk_bed            = config["refgenome_rmsk_bed"],
+      rmsk_sel_bed        = config["refgenome_rmsk_sel_bed"],
+      ultracons           = config["refgenome_ultracons"],
+      phylocsf_v31        = config["phylocsf_v31"],
+      phylocsf_v35        = config["phylocsf_v35"],
+      segdups_bed         = config["segdups_bed"],
+      sv_ctrl             = config["sv_ctrl"],
+      sv_nneu             = config["sv_nneu"]
+   resources:
+      tmpdir              = config["tmpdir"]
+   log:
+      out   = "logs/08_genomic_element_overlaps_{prefix}.log"
+   script:
+      "scripts/get-genomic-element-overlaps.sh"
+
+
+#-------------------#
+# RUN NIAP AND ASEF #
+#-------------------#
+rule run_niap_asef:
+   message: "Perform NIAP and ASEF analysis"
+   input:
+      isocollapse_gtf           = "{prefix}.gtf",
+      tss_bed                   = "{prefix}_tss.bed",
+      tts_bed                   = "{prefix}_tts.bed",
+      niap_merge_counts         = "{prefix}.counts",
+      trackgroups               = "{prefix}.trackgroups",
+      sq3_fasta                 = "01_sqanti3/{prefix}_corrected.fasta",
+      cpat_leng                 = "05_cpatv3/{prefix}_corrected.cpatv3l18.ORF_prob.tsv",
+      cpat_leng_seqs            = "05_cpatv3/{prefix}_corrected.cpatv3l18.ORF_seqs.fa",
+      transdecoder_checkpoint   = "11_transdecoder/{prefix}_transdecoder.check"
+   output:
+      ref_gtf                   = "09_niap_asef/{prefix}_reference.gtf",
+      ref_im_gtf                = "09_niap_asef/{prefix}_reference_im.gtf",
+      ref_gene_txt              = "09_niap_asef/{prefix}_reference_gene.txt",
+      ref_trns_txt              = "09_niap_asef/{prefix}_reference_transcript.txt",
+      ref_im_gene_txt           = "09_niap_asef/{prefix}_reference_im_gene.txt",
+      ref_im_trns_txt           = "09_niap_asef/{prefix}_reference_im_transcript.txt",
+      fusion_ratio              = "09_niap_asef/{prefix}_fusion_gene_ratio.txt",
+      fusion_mono               = "09_niap_asef/{prefix}_fusion_monoexonic_gene_id.txt",
+      reclocus_id               = "09_niap_asef/{prefix}_reclocus_gene_id.txt",
+      reclocus_gtf              = "09_niap_asef/{prefix}_reference_reclocus.gtf",
+      reclocus_im_gtf           = "09_niap_asef/{prefix}_reference_im_reclocus.gtf",
+      reclocus_gene_txt         = "09_niap_asef/{prefix}_reference_reclocus_gene.txt",
+      reclocus_trns_txt         = "09_niap_asef/{prefix}_reference_reclocus_transcript.txt",
+      reclocus_im_gene_txt      = "09_niap_asef/{prefix}_reference_im_reclocus_gene.txt",
+      reclocus_im_trns_txt      = "09_niap_asef/{prefix}_reference_im_reclocus_transcript.txt",
+      reclocus_gmst_gtf         = "09_niap_asef/{prefix}_reference_reclocus_GMST_CDS.gtf",
+      reclocus_cpat_gtf         = "09_niap_asef/{prefix}_reference_reclocus_CPAT_CDS.gtf",
+      reclocus_transdecoder_gtf = "09_niap_asef/{prefix}_reference_reclocus_transdecoder_CDS.gtf",
+      reclocus_cds_gtf          = "09_niap_asef/{prefix}_reference_reclocus_CDS.gtf",
+      reclocus_cds_trns_txt     = "09_niap_asef/{prefix}_reference_reclocus_CDS_transcript.txt",
+      reclocus_cds_gene_txt     = "09_niap_asef/{prefix}_reference_reclocus_CDS_gene.txt",
+      reclocus_refined          = "09_niap_asef/{prefix}_reference_reclocus_refined.txt",
+      reclocus_NE_gtf           = "09_niap_asef/{prefix}_reference_reclocus_CDS_NE_exon.gtf",
+      reclocus_NCE_gtf          = "09_niap_asef/{prefix}_reference_reclocus_CDS_NCE_cds.gtf",
+      reclocus_NECDS            = "09_niap_asef/{prefix}_reference_reclocus_CDS_NE_cds.txt",
+      reclocus_cds_aa           = "09_niap_asef/{prefix}_reference_reclocus_CDS_aa.fa"
+   threads:
+      48
+   conda:
+      "envs/base-packages.yaml"
+   params:
+      path                = shell_path,
+      path_maptools       = shell_maptools,
+      perl5lib            = shell_perl5lib,
+      output_dir          = directory("09_niap_asef"),
+      prefix              = config["prefix"],
+      refgenome_fasta     = config["refgenome_fasta"],
+      refgenome_niap_gtf  = config["refgenome_niap_gtf"],
+      intron_coverage     = config["intron_coverage"],
+      promoter_width      = config["promoter_width"],
+      nmdj_distance       = config["nmdj_distance"],
+      gmst_fnn            = "01_sqanti3/GMST/GMST_tmp.fnn",
+      tis_efficiency      = os.path.join(workflow.basedir, "../resources/TIS_efficiency.txt"),
+      min_prob_cpat3      = config["min_prob_cpat3"],
+      transdecoder        = "11_transdecoder/{prefix}_corrected.fasta.transdecoder.cds"
+   resources:
+      tmpdir              = config["tmpdir"]
+   log:
+      out   = "logs/09_niap_asef_{prefix}.log"
+   script:
+      "scripts/run-niap-asef.sh"
+
+
+#------------------#
+# GET POISON EXONS #
+#------------------#
+rule get_nmd_poison_exons:
+   message: "Identify NMD and poison exons"
+   input:
+      reclocus_cds_gtf    = "09_niap_asef/{prefix}_reference_reclocus_CDS.gtf"
+   output:
+      nmd_sj              = "10_nmd_poison_exons/{prefix}_reference_reclocus_CDS_nmd_sj.txt",
+      nmd_sj_per_iso      = "10_nmd_poison_exons/{prefix}_reference_reclocus_CDS_nmd_sj_per_transcript.txt",
+      nmd_sj_parsed       = "10_nmd_poison_exons/{prefix}_reference_reclocus_CDS_nmd_sj_per_transcript_parsed.txt"
+   threads:
+      24
+   conda:
+      "envs/base-packages.yaml"
+   params:
+      path                = shell_path,
+      path_maptools       = shell_maptools,
+      perl5lib            = shell_perl5lib,
+      output_dir          = directory("10_nmd_poison_exons"),
+      prefix              = config["prefix"],
+      refgenome_niap_gtf  = config["refgenome_niap_gtf"],
+      nmdj_min_cds_len    = config["nmdj_min_cds_len"],
+      nmdj_distance       = config["nmdj_distance"]
+   resources:
+      tmpdir              = config["tmpdir"]
+   log:
+      out   = "logs/10_nmd_poison_exons_{prefix}.log"
+   script:
+      "scripts/get-nmd-poison-exons.sh"
+
+
+#------------------#
+# RUN TRANSDECOCER #
+#------------------#
+rule run_transdecoder:
+   message: "Run transdecoder to identify ORFs"
+   input:
+      sq3_fasta           = "01_sqanti3/{prefix}_corrected.fasta"
+   output:
+      checkpoint          = "11_transdecoder/{prefix}_transdecoder.check"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      prefix              = config["prefix"],
+      pfam_a_hmm          = config["pfam_a_hmm"],
+      uniprot_sprot       = config["uniprot_sprot"],
+      uniref90            = config["uniref90"],
+      minorf_transdecoder = config["minorf_transdecoder"],
+      output_dir          = directory("11_transdecoder")
+   threads:
+      24
+   conda:
+      "envs/transdecoder.yaml"
+   log:
+      out   = "logs/11_transdecoder_{prefix}.log"
+   script:
+      "scripts/run-transdecoder.sh"
+
+
+#----------------------------#
+# GENERATE FINAL TRACK FILES #
+#----------------------------#
+rule get_tracks:
+   message: "get final track files"
+   input:
+      reclocus_cds_gtf    = "09_niap_asef/{prefix}_reference_reclocus_CDS.gtf",
+      reclocus_cds_trns_txt = "09_niap_asef/{prefix}_reference_reclocus_CDS_transcript.txt",
+      reclocus_refined    = "09_niap_asef/{prefix}_reference_reclocus_refined.txt",
+      iso_count_matrix    = "03_isoform_counts/{prefix}_isoform-counts.txt",
+      trackgroups         = "{prefix}.trackgroups"
+   output:
+      gtf_final           = "12_tracks/{prefix}_reference_reclocus_CDS_extra.gtf",
+      gtf_stopfix         = "12_tracks/{prefix}_patched_extra_stopfix.gtf"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      prefix              = config["prefix"],
+      output_dir          = directory("12_tracks")
+   threads:
+      24
+   conda:
+      "envs/tracks.yaml"
+   log:
+      out   = "logs/12_tracks_{prefix}.log"
+   script:
+      "scripts/get-tracks.sh"
+
+
+#--------------------------#
+# GET UNIQUE SPLICE CHAINS #
+#--------------------------#
+rule get_unique_splicechains:
+   message: "Get unique splice chains"
+   input:
+      bed_classpatched    = "02_sqanti3_patched/{prefix}_patched.bed"
+   output:
+      splicechains_out    = "13_splicechains/{prefix}_patched_splicechains.txt"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      prefix              = config["prefix"],
+      output_dir          = directory("13_splicechains")
+   threads:
+      24
+   conda:
+      "envs/tracks.yaml"
+   log:
+      out   = "logs/13_splicechains_{prefix}.log"
+   script:
+      "scripts/get-unique-splicechains.sh"
+
+
+#----------------------------#
+# RUN LIMMA FOR CORRELATIONS #
+#----------------------------#
+rule run_limma:
+   message: "Running limma analysis"
+   input:
+      iso_count_matrix      = "03_isoform_counts/{prefix}_isoform-counts.txt",
+      reclocus_cds_trns_txt = "09_niap_asef/{prefix}_reference_reclocus_CDS_transcript.txt"
+   output:
+      limma_checkpoint      = "14_DEG/{prefix}_limma.checkpoint"
+   params:
+      prefix                = config["prefix"],
+      output_dir            = directory("14_DEG"),
+      exp_design_file       = os.path.join(workflow.basedir, "../resources/exp-design_MAP-isoseq-bulk_selected-metadata.txt"),
+      exp_contrasts_file    = os.path.join(workflow.basedir, "../resources/exp-contrasts_MAP-65-samples-bulk-single.txt"),
+      exp_models_file       = os.path.join(workflow.basedir, "../resources/exp-models_MAP-isoseq-bulk_selected-metadata.txt"),
+      exp_highlight_file    = os.path.join(workflow.basedir, "../resources/brain-tissue-specific-genes_final.txt")
+   threads:
+      4
+   conda:
+      "envs/omics-pipelines.yaml"
+   log:
+      out   = "logs/14_DEG_{prefix}.log"
+   script:
+      "scripts/run-limma.sh"
+
+#----------------------------------------------------------------------------#
+# GET ORF FILES (all, clust, clust_contained) FOR MASS-SPEC PEPTIDE ANALYSIS #
+#----------------------------------------------------------------------------#
+rule run_collapseORFs:
+   message: "Collapse ORFs for Mass-Spec peptide mapping"
+   input:
+      reclocus_cds_aa     = "09_niap_asef/{prefix}_reference_reclocus_CDS_aa.fa"
+   output:
+      reclocus_cds_clust  = "15_collapsed-ORFs/{prefix}_reference_reclocus_CDS_aa_clust_header_generic.faa"
+   threads:
+      2
+   conda:
+      "envs/cdhit.yaml"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      output_dir          = directory("15_collapsed-ORFs"),
+      prefix              = config["prefix"]
+   log:
+      out   = "logs/15_collapseORFs_{prefix}.log"
+   script:
+      "scripts/get-ORFs-for-massspec.sh"
+
+
+#-----------------------------------------------------#
+# GET INPUT FILES FOR ISOFORMSWITCHANALYZER ANALYSIS  #
+#-----------------------------------------------------#
+rule get_isoformswitchanalyzer_input_files:
+   message: "Gather the set of files that are needed as inputs for isoformswitchanalyzer"
+   input:
+      iso_count_matrix    = "03_isoform_counts/{prefix}_isoform-counts.txt",
+      gtf_stopfix         = "12_tracks/{prefix}_patched_extra_stopfix.gtf",
+      trackgroups         = "{prefix}.trackgroups",
+      cpat_prob_best      = "05_cpatv3/{prefix}_corrected.cpatv3p18.ORF_prob.best.tsv",
+      pfam_launched       = "07_pfam/{prefix}_jobs-submitted.check",
+      reclocus_cds_aa     = "09_niap_asef/{prefix}_reference_reclocus_CDS_aa.fa"      
+   output:
+      exp_counts          = "16_isoformswitchanalyzer_inputs/{prefix}_exp_counts.txt",
+      exp_TPM             = "16_isoformswitchanalyzer_inputs/{prefix}_exp_TPM.txt",
+      exp_annots          = "16_isoformswitchanalyzer_inputs/{prefix}_exp_annots.gtf",
+      exp_design          = "16_isoformswitchanalyzer_inputs/{prefix}_exp_design.txt",
+      exp_cpat2           = "16_isoformswitchanalyzer_inputs/{prefix}_exp_cpat2.txt",
+      exp_cpat3           = "16_isoformswitchanalyzer_inputs/{prefix}_exp_cpat3.txt",
+      exp_isoforms_aa     = "16_isoformswitchanalyzer_inputs/{prefix}_exp_isoforms.faa",
+      exp_isoforms_nt     = "16_isoformswitchanalyzer_inputs/{prefix}_exp_isoforms-nt.fasta"
+   threads:
+      2
+   conda:
+      "envs/omics-pipelines.yaml"
+   params:
+      path                = shell_path,
+      perl5lib            = shell_perl5lib,
+      output_dir          = directory("16_isoformswitchanalyzer_inputs"),
+      prefix              = config["prefix"],
+      refgenome_fasta     = config["refgenome_fasta"],
+      isoswitch_min_count = config["isoswitch_min_count"],
+      pfamscan_output     = "07_pfam/{prefix}_reference_reclocus_CDS_aa_pfamscan.pfamscan"
+   log:
+      out   = "logs/16_isoformswitchanalyzer_inputs_{prefix}.log"
+   script:
+      "scripts/get_isoformswitchanalyzer_input_files.sh"
+

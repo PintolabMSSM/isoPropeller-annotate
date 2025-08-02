@@ -1,0 +1,111 @@
+#auto	SampleID	DisplayID	Group	Type	DEG_exclude	IID	ID_paper	Dx	Sex_estimated	sampleType	BrainBank	Seq_center	SeqBatch#	platfform	#SMRT-cells	Race	Ethnicity	age_yrs	age_pcw	PMI	Cause_death	RIN_PintoLab	RIN_Core
+1	flcount_PFC-DP14_hifi	PFC-DP14_hifi	CBL	Bulk	DP21-replicate	UMB5342	UMB_5342	CTL	M_mix	sample-level	UMB	MSSM	05_01_19	SequelII	1	AA		22	NA	14	Accidental	7.9	6.7
+2	flcount_CBL-DP21_hifi	CBL-DP21_hifi	CBL	Bulk	no	UMB5342	UMB_5342	CTL	M	sample-level	UMB	MSSM	05_01_19	SequelII	1	AA		22	NA	14	Accidental	7.7	6.5
+3	flcount_CBL-DP19_hifi	CBL-DP19_hifi	CBL	Bulk	no	UMB5559	UMB_5559	CTL	F	sample-level	UMB	MSSM	05_01_19	SequelII	1	White		19	NA	5	Accidental	7	6.7
+4	flcount_CBL-DP20_hifi	CBL-DP20_hifi	CBL	Bulk	no	UMB4925	UMB_4925	CTL	M_mix	sample-level	UMB	MSSM	05_01_19	SequelII	1	AA		13	NA	16	Natural	8.3	7.3
+5	flcount_CBL-DP22_hifi	CBL-DP22_hifi	CBL	Bulk	no	UMB5376	UMB_5376	CTL	M	sample-level	UMB	MSSM	05_01_19	SequelII	1	White		13	NA	19	Suicide	7.5	6.6
+6	flcount_CBL-pool-OF3_hifi	CBL-pool-OF3_hifi	CBL	Bulk	no	pool_OF3	OF3	CTL	M	clontech-pool	clontech	MSSM	06_10_22|07_08_22	SequelII	2	Asian		21-29	NA	NA	Natural	8.1	7
+7	flcount_CTL1_pool	CTL1_pool	PFC	Bulk	no	pool_CTL1	CTL1	CTL	pool	sample-level	pool	MSSM	01_01_19	SequelII	2	pool	pool	20.1-17.55(avg-median)	NA	pool	pool	7.9	NA
+8	flcount_CTL2_pool	CTL2_pool	PFC	Bulk	no	pool_CTL2	CTL2	CTL	pool	sample-level	pool	MSSM	01_01_19	SequelII	2	pool	pool	23.99-22.25(avg-median)	NA	pool	pool	7.7	NA
+9	flcount_PFC-DP13_hifi	PFC-DP13_hifi	PFC	Bulk	no	UMB5771	UMB_5771	ASD	F	sample-level	UMB	MSSM	05_01_19	SequelII	1	White		27	NA	5	Natural	6.8	5
+10	flcount_PFC-DP15_hifi	PFC-DP15_hifi	PFC	Bulk	no	UMB5376	UMB_5376	CTL	M	sample-level	UMB	MSSM	05_01_19	SequelII	1	White		13	NA	19	Suicide	8.7	8
+11	flcount_PFC-DP16_hifi	PFC-DP16_hifi	PFC	Bulk	no	UMB4669	UMB_4669	CTL	M	sample-level	UMB	MSSM	05_01_19	SequelII	1	White		16	NA	16	Accidental	7.4	6
+12	flcount_HBCC_1039_PFC_hifi	HBCC_1039_PFC_hifi	PFC	Bulk	no	HBCC_1039	HBCC_1039	CTL	F	sample-level	HBCC	MSSM	02_18_22|03_04_22	SequelII	2	AA	NHL	51.5	NA	24	Natural	9	7.9
+13	flcount_HBCC_1051_PFC_hifi	HBCC_1051_PFC_hifi	PFC	Bulk	no	HBCC_1051	HBCC_1051	CTL	F	sample-level	HBCC	MSSM	03_24_22|04_08_22	SequelII	2	AA	NHL	57.6	NA	19	Natural	8.9	7.5
+14	flcount_HBCC_1054_PFC_hifi	HBCC_1054_PFC_hifi	PFC	Bulk	no	HBCC_1054	HBCC_1054	CTL	M	sample-level	HBCC	MSSM	04_03_22|04_12_22	SequelII	2	AA	NHL	58.5	NA	28.5	Natural	9.2	8.6
+15	flcount_HBCC_1150_PFC_hifi	HBCC_1150_PFC_hifi	PFC	Bulk	no	HBCC_1150	HBCC_1150	CTL	F	sample-level	HBCC	MSSM	04_05_22|04_17_22	SequelII	2	AA	NHL	65	NA	28.5	Natural	8.6	7.6
+16	flcount_HBCC_1185_PFC_hifi	HBCC_1185_PFC_hifi	PFC	Bulk	no	HBCC_1185	HBCC_1185	CTL	F	sample-level	HBCC	MSSM	04_02_22|04_11_22	SequelII	2	AA	NHL	54.5	NA	24	Natural	8.9	7.4
+17	flcount_HBCC_1275_PFC_hifi	HBCC_1275_PFC_hifi	PFC	Bulk	no	HBCC_1275	HBCC_1275	CTL	M	sample-level	HBCC	MSSM	08_05_22|08_21_22	SequelII	2	AA	NHL	60.8	NA	13	Natural	7.5	7
+18	flcount_HBCC_1325_PFC_hifi	HBCC_1325_PFC_hifi	PFC	Bulk	no	HBCC_1325	HBCC_1325	CTL	F_mix	sample-level	HBCC	MSSM	05_28_22|06_04_22	SequelII	2	AA	NHL	45.8	NA	25	Natural	9.2	7.2
+19	flcount_HBCC_1563_PFC_hifi	HBCC_1563_PFC_hifi	PFC	Bulk	no	HBCC_1563	HBCC_1563	CTL	F	sample-level	HBCC	MSSM	02_04_22|02_11_22	SequelII	2	AA	NHL	21.3	NA	18	Natural	8.6	8.4
+20	flcount_HBCC_1615_PFC_hifi	HBCC_1615_PFC_hifi	PFC	Bulk	no	HBCC_1615	HBCC_1615	CTL	F	sample-level	HBCC	MSSM	08_12_22|08_18_22	SequelII	2	AA	NHL	71.8	NA	25	Natural	9.1	7.8
+21	flcount_HBCC_1883_PFC_hifi	HBCC_1883_PFC_hifi	PFC	Bulk	no	HBCC_1883	HBCC_1883	CTL	M	sample-level	HBCC	MSSM	05_17_22|05_23_22	SequelII	2	AA	NHL	45.2	NA	14.5	Natural	8.5	7.1
+22	flcount_HBCC_1927_PFC_hifi	HBCC_1927_PFC_hifi	PFC	Bulk	no	HBCC_1927	HBCC_1927	CTL	M	sample-level	HBCC	MSSM	02_20_22|02_25_22	SequelII	2	AA	NHL	49.7	NA	15.5	Natural	9.9	7.5
+23	flcount_HBCC_2543_PFC_hifi	HBCC_2543_PFC_hifi	PFC	Bulk	no	HBCC_2543	HBCC_2543	CTL	M	sample-level	HBCC	MSSM	03_28_22|04_25_22	SequelII	2	AA	NHL	50.5	NA	14.5	Natural	9.4	9.3
+24	flcount_HBCC_2587_PFC_hifi	HBCC_2587_PFC_hifi	PFC	Bulk	no	HBCC_2587	HBCC_2587	CTL	M	sample-level	HBCC	MSSM	06_11_22|06_17_22	SequelII	2	AA	NHL	50.6	NA	25.5	Natural	8.2	8.2
+25	flcount_HBCC_846_PFC_hifi	HBCC_846_PFC_hifi	PFC	Bulk	no	HBCC_846	HBCC_846	CTL	M	sample-level	HBCC	MSSM	03_13_22|03_18_22	SequelII	2	AA	NHL	58.5	NA	15	Natural	8.3	7.8
+26	flcount_HBCC_894_PFC_hifi	HBCC_894_PFC_hifi	PFC	Bulk	no	HBCC_894	HBCC_894	CTL	F	sample-level	HBCC	MSSM	07_23_22|07_24_22	SequelII	2	AA	NHL	58	NA	24	Natural	7.9	6.1
+27	flcount_HBCC_910_PFC_hifi	HBCC_910_PFC_hifi	PFC	Bulk	no	HBCC_910	HBCC_910	CTL	F	sample-level	HBCC	MSSM	06_27_22|06_29_22	SequelII	2	AA	NHL	53	NA	10	Natural	9.1	8.6
+28	flcount_HBCC_977_PFC_hifi	HBCC_977_PFC_hifi	PFC	Bulk	no	HBCC_977	HBCC_977	CTL	M	sample-level	HBCC	MSSM	07_10_22|07_11_22	SequelII	2	AA	NHL	56.3	NA	31.5	Natural	9.2	8.2
+29	flcount_SF1156_dACC	SF1156_dACC	ACC	Bulk	no	SF1156	HBCC_1156	CTL	F	sample-level	HBCC	Stanford	10_14_22	SequelIIe	1	AA	NHL	53.9	NA	25.5	Natural	7.9	7.9
+30	flcount_SF1156_DLPFC	SF1156_DLPFC	PFC	Bulk	no	SF1156	HBCC_1156	CTL	F	sample-level	HBCC	Stanford	10_14_22	SequelIIe	1	AA	NHL	53.9	NA	25.5	Natural	7.7	7.7
+31	flcount_SF1156_Hippocampus	SF1156_Hippocampus	HIP	Bulk	no	SF1156	HBCC_1156	CTL	F	sample-level	HBCC	Stanford	09_22_22	SequelIIe	1	AA	NHL	53.9	NA	25.5	Natural	6.1	6.1
+32	flcount_SF1227_dACC_hifi	SF1227_dACC_hifi	ACC	Bulk	no	SF1227	HBCC_1227	CTL	F	sample-level	HBCC	Stanford	06_22_22	SequelIIe	1	AA	NHL	26.8	NA	25	Homicide	8.1	8.1
+33	flcount_SF1227_DLPFC_hifi	SF1227_DLPFC_hifi	PFC	Bulk	no	SF1227	HBCC_1227	CTL	F	sample-level	HBCC	Stanford	02_11_23	SequelIIe	1	AA	NHL	26.8	NA	25	Homicide	8.1	8.1
+34	flcount_SF1227_hippocampus_hifi	SF1227_hippocampus_hifi	HIP	Bulk	no	SF1227	HBCC_1227	CTL	F	sample-level	HBCC	Stanford	06_22_22	SequelIIe	1	AA	NHL	26.8	NA	25	Homicide	8	8
+35	flcount_SF1390_dACC	SF1390_dACC	ACC	Bulk	no	SF1390	HBCC_1390	CTL	F	sample-level	HBCC	Stanford	01_25_22	SequelIIe	1	AA	NHL	42.7	NA	8.17	Natural	8.9	8.9
+36	flcount_SF1390_DLPFC	SF1390_DLPFC	PFC	Bulk	no	SF1390	HBCC_1390	CTL	F	sample-level	HBCC	Stanford	01_25_22	SequelIIe	1	AA	NHL	42.7	NA	8.17	Natural	8	8
+37	flcount_SF2052_DLPFC_hifi	SF2052_DLPFC_hifi	PFC	Bulk	no	SF2052	HBCC_2052	CTL	M	sample-level	HBCC	Stanford	11_18_21	SequelIIe	1	White	NHL	40.1	NA	12	Natural	6.9	6.9
+38	flcount_SF2780_dACC	SF2780_dACC	ACC	Bulk	no	SF2780	HBCC_2780	CTL	M	sample-level	HBCC	Stanford	10_14_22	SequelIIe	1	White	NHL	17.9	NA	47	Homicide	3.7	3.7
+39	flcount_SF2780_DLPFC	SF2780_DLPFC	PFC	Bulk	no	SF2780	HBCC_2780	CTL	M	sample-level	HBCC	Stanford	10_14_22	SequelIIe	1	White	NHL	17.9	NA	47	Homicide	7	7
+40	flcount_SF2780_Hippocampus	SF2780_Hippocampus	HIP	Bulk	no	SF2780	HBCC_2780	CTL	M	sample-level	HBCC	Stanford	09_22_22	SequelIIe	1	White	NHL	17.9	NA	47	Homicide	5.9	5.9
+41	flcount_SF2781_dACC_hifi	SF2781_dACC_hifi	ACC	Bulk	no	SF2781	HBCC_2781	CTL	M	sample-level	HBCC	Stanford	06_13_22	SequelIIe	1	Hispanic	HL	38.8	NA	9.5	Natural	7.1	7.1
+42	flcount_SF2781_DLPFC	SF2781_DLPFC	PFC	Bulk	no	SF2781	HBCC_2781	CTL	M	sample-level	HBCC	Stanford	04_19_22	SequelIIe	1	Hispanic	HL	38.8	NA	9.5	Natural	8.8	8.8
+43	flcount_SF2781_Hippocampus	SF2781_Hippocampus	HIP	Bulk	no	SF2781	HBCC_2781	CTL	M	sample-level	HBCC	Stanford	04_19_22	SequelIIe	1	Hispanic	HL	38.8	NA	9.5	Natural	8.5	8.5
+44	flcount_SF2791_dACC	SF2791_dACC	ACC	Bulk	no	SF2791	HBCC_2791	CTL	M	sample-level	HBCC	Stanford	04_19_22	SequelIIe	1	Asian	NHL	55.5	NA	15	Homicide	8.1	8.1
+45	flcount_SF2791_DLPFC	SF2791_DLPFC	PFC	Bulk	no	SF2791	HBCC_2791	CTL	M	sample-level	HBCC	Stanford	04_19_22	SequelIIe	1	Asian	NHL	55.5	NA	15	Homicide	7.6	7.6
+46	flcount_SF2791_Hippocampus	SF2791_Hippocampus	HIP	Bulk	no	SF2791	HBCC_2791	CTL	M	sample-level	HBCC	Stanford	06_13_22	SequelIIe	1	Asian	NHL	55.5	NA	15	Homicide	8.3	8.3
+47	flcount_FB-pool-OF21_hifi	FB-pool-OF21_hifi	FetalBr	Bulk	yes	pool_OF21	OF21	CTL	pool	clontech-pool	clontech	MSSM	06_16_22|07_02_22	SequelII	2	White		NA	26-40	NA	Natural	8.1	7.7
+48	flcount_RH_combined	RH_combined	PFC	Bulk	yes	RH_combined	RH_combined	CTL	pool	pooled-computationally	pool	MSSM	RSII	RSII	2	White	pool	61.8-63.5(avg-median)	NA	pool	pool	7.94(avg)	NA
+49	flcount_FL_combined	FL_combined	PFC	Bulk	yes	FL_combined	FL_combined	CTL	pool	pooled-computationally	pool	MSSM	RSII	RSII	2	White	pool	61.8-63.5(avg-median)	NA	pool	pool	7.74(avg)	NA
+50	flcount_cerebellumPool	cerebellumPool	CBL	Bulk	yes	cerebellumPool	cerebellum_pool	CTL	M	clontech-pool	clontech	MSSM	SequelI	SequelI	2	Asian		21-29	NA	NA	Natural	8.1	7
+51	flcount_humfetalbrainpool_clontech	humfetalbrainpool_clontech	FetalBr	Bulk	yes	humfetalbrainpool	humfetalbrainpool_clontech	CTL	pool	clontech-pool	clontech	MSSM	SequelI	SequelI	3	White		NA	26-40	NA	Natural	8.1	7.7
+52	flcount_HSB_combined	HSB_combined	PFC	Bulk	yes	HSB_combined	UMB_5398	CTL	M	pooled-computationally	Yale	MSSM	SequelI	SequelI	2	White		36	NA	24	Accidental	8.2	NA
+53	CMC_PITT_046	FL_combined|RH_combined	PFC	Bulk	NA	FL_046|RH_046	FL_combined;RH_combined	CTL	M	sample-level	Pitt	MSSM	NA	RSII	16-24_each	White		43	NA	21.7	Natural	8.2	NA
+54	CMC_PITT_034	FL_combined|RH_combined	PFC	Bulk	NA	FL_034|RH_034	FL_combined;RH_combined	CTL	M	sample-level	Pitt	MSSM	NA	RSII	16-24_each	White		55	NA	6.4	Natural	9.2	NA
+55	CMC_MSSM_060	FL_combined|RH_combined	PFC	Bulk	NA	FL_060|RH_060	FL_combined;RH_combined	CTL	M	sample-level	MSSM	MSSM	NA	RSII	16-24_each	AA		92	NA	3.2	Natural	7	NA
+56	CMC_MSSM_104	FL_combined|RH_combined	PFC	Bulk	NA	FL_104|RH_104	FL_combined;RH_combined	CTL	M	sample-level	MSSM	MSSM	NA	RSII	16-24_each	Unknown		35	NA	7	Natural	8.7	NA
+57	CMC_MSSM_182	FL_combined|RH_combined	PFC	Bulk	NA	FL_182|RH_182	FL_combined;RH_combined	CTL	M	sample-level	MSSM	MSSM	NA	RSII	16-24_each	White		62	NA	23.7	Natural	8.1	NA
+58	CMC_PITT_122	FL_combined|RH_combined	PFC	Bulk	NA	FL_122|RH_122	FL_combined;RH_combined	CTL	F	sample-level	Pitt	MSSM	NA	RSII	16-24_each	White		65	NA	21.5	Natural	8.7	NA
+59	CMC_PITT_140	FL_combined|RH_combined	PFC	Bulk	NA	FL_140|RH_140	FL_combined;RH_combined	CTL	F	sample-level	Pitt	MSSM	NA	RSII	16-24_each	White		36	NA	14.5	Accidental	8.4	NA
+60	CMC_MSSM_072	FL_combined|RH_combined	PFC	Bulk	NA	FL_072|RH_072	FL_combined;RH_combined	CTL	F	sample-level	MSSM	MSSM	NA	RSII	16-24_each	White		66	NA	22.6	Natural	8.2	NA
+61	CMC_MSSM_073	FL_combined|RH_combined	PFC	Bulk	NA	FL_073|RH_073	FL_combined;RH_combined	CTL	F	sample-level	MSSM	MSSM	NA	RSII	16-24_each	White		79	NA	8.6	Natural	8.6	NA
+62	CMC_MSSM_401	FL_combined|RH_combined	PFC	Bulk	NA	FL_401|RH_401	FL_combined;RH_combined	CTL	F	sample-level	MSSM	MSSM	NA	RSII	16-24_each	White		85	NA	5	Unknown	7.7	NA
+63	AN_08161	CTL1_pool	PFC	Bulk	NA	CTL1	CTL1	CTL	F	sequenced-in-a-pool	Harvard-ATP	MSSM	NA	SequelII	NA	White(estimated)		36	NA	23.83	Natural	8.4	NA
+64	AN_12137	CTL1_pool	PFC	Bulk	NA	CTL1	CTL1	CTL	M	sequenced-in-a-pool	Harvard-ATP	MSSM	NA	SequelII	NA	White(estimated)		31	NA	32.92	Accidental	8.2	NA
+65	UMB_1908	CTL1_pool	PFC	Bulk	NA	CTL1	CTL1	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	White		14	NA	13	Suicide	9.3	NA
+66	UMB_5242	CTL1_pool	PFC	Bulk	NA	CTL1	CTL1	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	White		15.3	NA	9	Natural	6.3	NA
+67	UMB_5309	CTL1_pool	PFC	Bulk	NA	CTL1	CTL1	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	White		14.4	NA	8	Natural	7.9	NA
+68	UMB_5342	CTL1_pool	PFC	Bulk	NA	CTL1	CTL1	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	AA		22.9	NA	14	Accidental	8	NA
+69	UMB_5376	CTL1_pool	PFC	Bulk	NA	CTL1	CTL1	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	White		13.3	NA	19	Hanging	8.7	NA
+70	UMB_5408	CTL1_pool	PFC	Bulk	NA	CTL1	CTL1	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	AA		6.8	NA	16	Accidental	8.1	NA
+71	UMB_5889	CTL1_pool	PFC	Bulk	NA	CTL1	CTL1	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	White		27.5	NA	12	Natural	7.8	NA
+72	UMB_5893	CTL1_pool	PFC	Bulk	NA	CTL1	CTL1	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	White		19.8	NA	11	Natural	6.7	NA
+73	AN_10679	CTL2_pool	PFC	Bulk	NA	CTL2	CTL2	CTL	F	sequenced-in-a-pool	Harvard-ATP	MSSM	NA	SequelII	NA	AA(estimated)		41	NA	14	Unknown	8.3	NA
+74	AN_14757	CTL2_pool	PFC	Bulk	NA	CTL2	CTL2	CTL	M	sequenced-in-a-pool	Harvard-ATP	MSSM	NA	SequelII	NA	AA(estimated)		24	NA	21.33	Natural	8.7	NA
+75	UMB_4345	CTL2_pool	PFC	Bulk	NA	CTL2	CTL2	CTL	F	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	White		27.9	NA	19	Natural	6.4	NA
+76	UMB_4590	CTL2_pool	PFC	Bulk	NA	CTL2	CTL2	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	White		20.5	NA	19	Natural	8.7	NA
+77	UMB_4669	CTL2_pool	PFC	Bulk	NA	CTL2	CTL2	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	White		16.3	NA	16	Accidental	7.4	NA
+78	UMB_4925	CTL2_pool	PFC	Bulk	NA	CTL2	CTL2	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	AA		13.2	NA	16	Natural	6.9	NA
+79	UMB_5079	CTL2_pool	PFC	Bulk	NA	CTL2	CTL2	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	White		33.2	NA	16	Accidental	7.6	NA
+80	UMB_5168	CTL2_pool	PFC	Bulk	NA	CTL2	CTL2	CTL	F	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	White		15.9	NA	11	Natural	7.9	NA
+81	UMB_5186	CTL2_pool	PFC	Bulk	NA	CTL2	CTL2	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	AA		18.7	NA	14	Suicide	7.9	NA
+82	UMB_5580	CTL2_pool	PFC	Bulk	NA	CTL2	CTL2	CTL	M	sequenced-in-a-pool	UMB	MSSM	NA	SequelII	NA	White		29.2	NA	8	Natural	7.6	NA
+83	HBCC_1030	HBCC_1030	PFC	Bulk	no	HBCC_1030	HBCC_1030	SCZ	F	sample-level	HBCC	MSSM	06_17_22|06_25_22	SequelII	2	AA		49.7	NA	14.5	Natural	8.7	7.5
+84	HBCC_1280	HBCC_1280	PFC	Bulk	no	HBCC_1280	HBCC_1280	SCZ	F	sample-level	HBCC	MSSM	04_04_22|04_17_22	SequelII	2	AA		62.4	NA	28	Natural	8	7
+85	HBCC_1399	HBCC_1399	PFC	Bulk	no	HBCC_1399	HBCC_1399	SCZ	F	sample-level	HBCC	MSSM	02_19_22|02_27_22	SequelII	2	AA		45	NA	17.5	Natural	8.1	6.3
+86	HBCC_1576	HBCC_1576	PFC	Bulk	no	HBCC_1576	HBCC_1576	SCZ	F	sample-level	HBCC	MSSM	03_13_22|03_21_22	SequelII	2	AA		66.3	NA	32	Natural	8.4	8
+87	HBCC_1665	HBCC_1665	PFC	Bulk	no	HBCC_1665	HBCC_1665	SCZ	F	sample-level	HBCC	MSSM	05_17_22|05_24_22	SequelII	2	AA		34.9	NA	36	Natural	8.8	8.1
+88	HBCC_2348	HBCC_2348	PFC	Bulk	no	HBCC_2348	HBCC_2348	SCZ	F	sample-level	HBCC	MSSM	03_28_22|04_22_22	SequelII	2	AA		58	NA	27	Natural	8.5	7.4
+89	HBCC_855	HBCC_855	PFC	Bulk	no	HBCC_855	HBCC_855	SCZ	F	sample-level	HBCC	MSSM	07_15_22|07_16_22	SequelII	2	AA		60.8	NA	11.42	Natural	8.9	8.1
+90	MSSM_87252	MSSM_87252	PFC	Bulk	no	MSSM_87252	MSSM_87252	SCZ	F	sample-level	MSSM	MSSM	09_04_22|08_06_22	SequelII	2	??		67	NA	29.92	Natural	7.6	7.2
+91	HBCC_1067	HBCC_1067	PFC	Bulk	no	HBCC_1067	HBCC_1067	SCZ	M	sample-level	HBCC	MSSM	08_04_22|08_07_22	SequelII	2	AA		75.6	NA	20.5	Natural	7.2	7.1
+92	HBCC_1081	HBCC_1081	PFC	Bulk	no	HBCC_1081	HBCC_1081	SCZ	M	sample-level	HBCC	MSSM	03_27_22|04_02_22	SequelII	2	AA		58.1	NA	23.5	Natural	9.2	8.7
+93	HBCC_1371	HBCC_1371	PFC	Bulk	no	HBCC_1371	HBCC_1371	SCZ	M	sample-level	HBCC	MSSM	02_19_22|03_07_22	SequelII	2	AA		65.4	NA	33	Natural	8.8	7.4
+94	HBCC_1693	HBCC_1693	PFC	Bulk	no	HBCC_1693	HBCC_1693	SCZ	M	sample-level	HBCC	MSSM	07_27_22|07_29_22	SequelII	2	AA		71	NA	29.5	Natural	8.2	7.6
+95	HBCC_1751	HBCC_1751	PFC	Bulk	no	HBCC_1751	HBCC_1751	SCZ	M	sample-level	HBCC	MSSM	05_28_22|06_04_22	SequelII	2	AA		57.2	NA	30.5	Natural	8.2	6.8
+96	HBCC_1989	HBCC_1989	PFC	Bulk	no	HBCC_1989	HBCC_1989	SCZ	M	sample-level	HBCC	MSSM	06_30_22|07_09_22	SequelII	2	AA		59.1	NA	24.5	Natural	7.8	6.3
+97	HBCC_2020	HBCC_2020	PFC	Bulk	no	HBCC_2020	HBCC_2020	SCZ	M	sample-level	HBCC	MSSM	02_05_22|02_14_22	SequelII	2	AA		52	NA	31	Natural	8.8	7.6
+98	HBCC_2261	HBCC_2261	PFC	Bulk	no	HBCC_2261	HBCC_2261	SCZ	M	sample-level	HBCC	MSSM	05_02_22|05_09_22	SequelII	2	AA		51.5	NA	17.33	Natural	8.6	6.8
+99	UMB5294	UMB5294	PFC	Bulk	no	UMB5294	UMB_5294	ASD	M	sample-level	UMB	MSSM	05_09_22|05_13_22	SequelII	2	White		19	NA	16	Suicide	8	8.2
+100	UMB5308	UMB5308	PFC	Bulk	no	UMB5308	UMB_5308	ASD	M	sample-level	UMB	MSSM	01_07_22|01_15_22	SequelII	2	White		4	NA	21	Accidental	8.9	8
+101	UMB5419	UMB5419	PFC	Bulk	no	UMB5419	UMB_5419	ASD	F	sample-level	UMB	MSSM	01_25_22|01_31_22	SequelII	2	White		19	NA	22	Natural	7.7	8.1
+102	UMB5454	UMB5454	PFC	Bulk	no	UMB5454	UMB_5454	ASD	M	sample-level	UMB	MSSM	01_10_22|01_16_22	SequelII	2	White		11	NA	20	Natural	6.3	6.2
+103	UMB5531	UMB5531	PFC	Bulk	no	UMB5531	UMB_5531	ASD	M	sample-level	UMB	MSSM	01_24_22|01_28_22	SequelII	2	White		15.4	NA	32	unknown	7.2	7.3
+104	UMB5278	UMB5278	PFC	Bulk	no	UMB5278	UMB_5278	ASD,EPI	F	sample-level	UMB	MSSM	01_25_22|01_29_22	SequelII	2	White		15	NA	13	Accidental	7.9	8.4
+105	UMB5939	UMB5939	PFC	Bulk	no	UMB5939	UMB_5939	ASD,EPI	M	sample-level	UMB	MSSM	01_07_22|01_15_22	SequelII	2	White		21	NA	22	Natural	6.1	7.7
+106	UMB5940	UMB5940	PFC	Bulk	no	UMB5940	UMB_5940	ASD,EPI	M	sample-level	UMB	MSSM	01_09_22|01_16_22	SequelII	2	White		29	NA	20	Accidental	8.8	7.6
+107	UMB5945	UMB5945	PFC	Bulk	no	UMB5945	UMB_5945	ASD,EPI	M	sample-level	UMB	MSSM	02_03_22|02_13_22	SequelII	2	White		20	NA	24	Natural	7.8	8
+108	UMB5945_renam	UMB5945_renam	PFC	Bulk	replicate	UMB5945_renam	UMB_5945_r	ASD,EPI	M	sample-level	UMB	MSSM	02_02_22|02_10_22	SequelII	2	White		20	NA	24	Natural	7.8	8
+109	AN15451	AN15451	PFC	Bulk	no	AN15451	AN_15451	ASD,EPI,15q11.2-13.1-DUPsyndr?	M	sample-level	Harvard-ATP	MSSM	01_24_22|01_30_22	SequelII	2	AA		16	NA	39.9	Natural	7.3	6.2
+110	ASD_pool	ASD_pool	PFC	Bulk	no	ASD_pool		ASD	pool	sequenced-in-a-pool	pool	MSSM	01_01_19	SequelII	2	pool			NA	NA	pool		

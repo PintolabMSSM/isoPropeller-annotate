@@ -1,0 +1,15 @@
+channels:
+ - conda-forge
+ - bioconda
+ - defaults
+dependencies:
+ - bedtools>=2.30.0
+ - samtools>=1.16.1
+ - gffread
+ - r>=3.6.0
+ - r-matrix>=1.5
+ - r-getopt>=1.20.3
+ - bioconductor-biocgenerics>=0.34.0
+ - bioconductor-rtracklayer>=1.48.0
+ - bioconductor-biostrings>=2.66
+ - perl-bioperl

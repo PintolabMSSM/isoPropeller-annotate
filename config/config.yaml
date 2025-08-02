@@ -1,0 +1,69 @@
+# Prefix of the sample to analyze
+prefix: PREFIX
+
+# Paths to required prerequisite github repositories
+# Note: The pipeline has been tested with SQANTI3 v5.2
+#       The pipeline expects the SQANTI3.env environment to exist on the target system
+#       Please follow the installation notes on https://github.com/ConesaLab/SQANTI3 to create this environment
+sqanti_path:              /sc/arion/work/pintod02/opt/SQANTI3/current                           # Point this to the location of the SQANTI3 installation
+cdna_cupcake_path:        /sc/arion/work/pintod02/opt/SQANTI3/current/cDNA_Cupcake              # Point this to the location of the cDNA_cupcake installation
+isoseq_pipeline_path:     /sc/arion/work/pintod02/opt/isoseq_pipeline                           # git clone git@github.com:PintolabMSSM/isoseq_pipeline.git
+utility_path:             /sc/arion/work/pintod02/opt/omics-toolkit/utility                     # git clone git@github.com:BakelLab/omics-toolkit.git (utility/      subdir)
+utility_perl5lib:         /sc/arion/work/pintod02/opt/omics-toolkit/lib/perl5                   # git clone git@github.com:BakelLab/omics-toolkit.git (lib/perl5/    subdir)
+track_tools_path:         /sc/arion/work/pintod02/opt/omics-toolkit/track-tools                 # git clone git@github.com:BakelLab/omics-toolkit.git (track-tools/  subdir)
+ngs_tools_path:           /sc/arion/work/pintod02/opt/omics-toolkit/ngs-tools                   # git clone git@github.com:BakelLab/omics-toolkit.git (ngs-tools/    subdir)
+minerva_queue_lsf_path:   /sc/arion/work/pintod02/opt/minerva-queue-lsf/                        # git clone git@github.com:BakelLab/minerva-queue-lsf.git
+isoseq_map_analysis_path: /sc/arion/work/pintod02/opt/isoseq_map_analysis/analysis              # git clone git@github.com:PintolabMSSM/isoseq_map_analysis.git
+
+# Path to temporary directory
+tmpdir:                   /sc/arion/scratch/pintod02/
+
+# Queueing system project allocation
+project_allocation:       acc_pintod02b
+
+# Define a few constants for TSS analysis
+promoter_width:           100   # The width of a promoter
+
+# Define a few constants for the nmd_splice_junction_finder
+nmdj_min_cds_len:         24    # The minimal CDS length including the stop codon
+nmdj_distance:            50    # The distance between the stop codon (exclusive) and the downstream 3' most splice site (-1 is off)
+
+# Define the minimum ORF lengths to use for CPAT (in nucleotides) and transdecoder (in amino acids) analyses
+minorf_cpat3:             18
+minorf_transdecoder:      100
+
+# Define the minimal coding probability for CPAT
+min_prob_cpat3:           0.9
+
+# Set minimum reads per sample to be included in the IsoformSwitchAnalyzeR filtered file set
+isoswitch_min_count:      5000
+
+# Paths to required reference directories and files
+refgenome_dir:            /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC
+refgenome_fasta:          /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/GRCh38.primary_assembly.genome.fa
+refgenome_gtf:            /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/gencode.v41.annotation_no-mi-sn-sno-sca-RNAs.gtf
+refgenome_niap_gtf:       /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/gencode.v41.annotation_cleaned.gtf
+refgenome_anno:           /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/gencode.v41.annotation.anno
+refgenome_rmsk_bed:       /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/GRCh38.primary_assembly.genome_rmsk_nr.bed
+refgenome_rmsk_sel_bed:   /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/GRCh38.primary_assembly.genome_rmsk_LINE-SINE-LTR-DNA.bed
+refgenome_ultracons:      /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/GRCh38.primary_assembly_ultraconserved_nr.bed
+polya_motifs:             /sc/arion/work/pintod02/opt/isoseq_pipeline/data/human.polyA.list.txt
+polya_bed:                /sc/arion/work/pintod02/opt/isoseq_pipeline/data/atlas.clusters.2.0.GRCh38.96.bed
+cage_peaks_refTSS:        /sc/arion/work/pintod02/opt/isoseq_pipeline/data/refTSS_v3.3_human_coordinate.hg38.bed  # NOTE: used only for pigeon as it crashes with cage_peaks_allmerge
+cage_peaks_allmerge:      /sc/arion/work/pintod02/opt/isoseq_pipeline/data/combined_cage_Pitt-Fantom5-119FrontalLob_refTSS3.3_extended.merged.sorted_chr.bed
+phylocsf_v31:             /sc/arion/work/pintod02/opt/isoseq_pipeline/data/PhyloCSFNovel.hsap38.v31.hg38_58.bed
+phylocsf_v35:             /sc/arion/work/pintod02/opt/isoseq_pipeline/data/PhyloCSFNovel.hsap38.v35.hg38_58.bed
+segdups_bed:              /sc/arion/work/pintod02/opt/isoseq_pipeline/data/SegDups_hg38.merged.bed
+intron_coverage:          /sc/arion/work/pintod02/opt/isoseq_pipeline/data/merged-intropolis-PEC-GTEX.SJ.out.tab
+cpat_prebuilt_logit:      /sc/arion/work/pintod02/opt/isoseq_pipeline/cpat_prebuilt_models/Human_logitModel.RData
+cpat_prebuilt_hex:        /sc/arion/work/pintod02/opt/isoseq_pipeline/cpat_prebuilt_models/Human_Hexamer.tsv
+sv_ctrl:                  /sc/arion/work/pintod02/opt/isoseq_pipeline/data/gnomad_v2.1_sv.controls_only.sites.chrStartEndName.hg38.bed
+sv_nneu:                  /sc/arion/work/pintod02/opt/isoseq_pipeline/data/gnomad_v2.1_sv.nonneuro.sites.chrStartEndName.hg38.bed
+pfam_a_hmm:               /sc/arion/projects/bakellab/reference-databases/pfam/Pfam-A.hmm
+uniprot_sprot:            /sc/arion/projects/pintod02c/reference-databases/uniprot-sprot/uniprot_sprot.fasta
+uniref90:                 /sc/arion/projects/pintod02c/reference-databases/uniprot-sprot/uniref90.fasta
+pogo_peptides:            /sc/arion/work/pintod02/opt/sm_post-niap-merge/resources/pogoin_original-map_peptides_mm0.txt
+
+# Conditional rules
+CONDITIONAL:
+   - "pogo"

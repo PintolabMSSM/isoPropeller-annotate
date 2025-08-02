@@ -1,0 +1,10 @@
+channels:
+ - conda-forge
+ - bioconda
+dependencies:
+ - python>=3.9.9
+ - numpy>=1.22.0
+ - r-base>=3.2.2
+ - openssl=1.1.1l
+ - cpat>=3.0.4
+ - gffread

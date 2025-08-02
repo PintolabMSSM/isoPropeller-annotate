@@ -1,0 +1,7 @@
+name: omics-pipelines
+channels:
+ - conda-forge
+ - bioconda
+ - hvbakel
+dependencies:
+ - omics-pipelines
