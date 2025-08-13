@@ -1,8 +1,10 @@
 channels:
  - conda-forge
  - bioconda
+ - hvbakel
  - defaults
 dependencies:
+ - omics-toolkit
  - bedtools>=2.30.0
  - samtools>=1.16.1
  - jq>=1.6
