@@ -21,6 +21,9 @@ tmpdir:                   /sc/arion/scratch/pintod02/
 # Queueing system project allocation
 project_allocation:       acc_pintod02b
 
+# For steps where we split sequence files in chunks for processing, define how many sequences per chunk
+seqs_per_chunk:           1000
+
 # Define a few constants for TSS analysis
 promoter_width:           100   # The width of a promoter
 

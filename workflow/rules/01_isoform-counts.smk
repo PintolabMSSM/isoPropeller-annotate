@@ -1,6 +1,6 @@
-#--------------------------#
-# GET ISOFORM COUNT MATRIX #
-#--------------------------#
+# ───────────────────────────────────────────────
+# Rule: Get isoform count matrix
+# ───────────────────────────────────────────────
 rule isoform_count_matrix:
     message: "Copy the isoPropeller-collapse count matrix"
     input:
@@ -20,10 +20,6 @@ rule isoform_count_matrix:
         r'''
         (
            echo "## Get isoform count matrix ##"
-           
-           # Set up output folder
-           rm -rf   "{params.output_dir}"
-           mkdir -p "{params.output_dir}"
            
            # Just copy the count file
            cat "{input.isop_counts}" > "{output.iso_count_matrix}"
