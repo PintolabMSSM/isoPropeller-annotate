@@ -120,6 +120,9 @@ rule diamond_blastp:
 # ───────────────────────────────────────────────
 # Rule: Predict per chunk (keeps -O predicted/)
 # ───────────────────────────────────────────────
+ruleorder:
+    transdecoder_predict > get_isoform_fasta
+
 rule transdecoder_predict:
     input:
         fasta     = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks/chunk_{{chunk_id}}.fasta",
@@ -154,6 +157,9 @@ rule transdecoder_predict:
 # ───────────────────────────────────────────────
 # Rule: Aggregate merged outputs
 # ───────────────────────────────────────────────
+ruleorder:
+    aggregate_results > get_isoform_fasta
+
 rule aggregate_results:
     input:
         lambda wc: expand(
