@@ -1,11 +1,12 @@
 # ───────────────────────────────────────────────
 # Local variables / imports
 # ───────────────────────────────────────────────
+import os
 
 TRANSDECODER_OUT_DIR = "02_ORF_prediction/transdecoder"
 TRANSDECODER_LOG_DIR = f"logs/{TRANSDECODER_OUT_DIR}"
 
-# Helper
+# Helper: resolve chunk ids produced by the checkpoint
 def get_chunk_ids(wildcards):
     checkpoint_output = checkpoints.split_fasta.get(prefix=wildcards.prefix).output[0]
     with open(os.path.join(checkpoint_output, "chunk_ids.txt"), "r") as f:
@@ -16,24 +17,27 @@ def get_chunk_ids(wildcards):
 # ───────────────────────────────────────────────
 checkpoint split_fasta:
     input:
-        fasta="02_ORF_prediction/{prefix}.fasta"
+        fasta = "02_ORF_prediction/{prefix}.fasta"
     output:
         directory(f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks")
     params:
-        seqs_per_chunk=config["seqs_per_chunk"]
+        seqs_per_chunk = config["seqs_per_chunk"]
     conda:
         SNAKEDIR + "envs/transdecoder.yaml"
     script:
         SNAKEDIR + "scripts/split_fasta.py"
 
 # ───────────────────────────────────────────────
-# Rule: Longest ORFs per chunk
+# Rule: Longest ORFs per chunk (writes under predicted/)
 # ───────────────────────────────────────────────
 rule transdecoder_longorfs:
     input:
         f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks/chunk_{{chunk_id}}.fasta"
     output:
-        f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks/chunk_{{chunk_id}}.fasta.transdecoder_dir/longest_orfs.pep"
+        f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.fasta.transdecoder_dir/longest_orfs.pep"
+    params:
+        out_parent_dir = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted",
+        minorf = config["minorf_transdecoder"]
     threads: 2
     log:
         f"{TRANSDECODER_LOG_DIR}/{{prefix}}/longorfs/{{chunk_id}}.log"
@@ -44,22 +48,21 @@ rule transdecoder_longorfs:
         set -euo pipefail
         (
             echo "## TransDecoder.LongOrfs chunk {wildcards.chunk_id} ({wildcards.prefix})"
-            # Write the .transdecoder_dir next to the chunk FASTA:
             TransDecoder.LongOrfs \
-                -m {config[minorf_transdecoder]} \
+                -m {params.minorf} \
                 -S \
                 -t "{input}" \
-                --output_dir "$(dirname "{input}")"
+                --output_dir "{params.out_parent_dir}"
             test -s "{output}"
         ) &> "{log}"
         '''
 
 # ───────────────────────────────────────────────
-# Rule: Pfam domain search
+# Rule: Pfam domain search (reads longest_orfs.pep from predicted/)
 # ───────────────────────────────────────────────
-rule hmmsearch:
+rule hmmscan:
     input:
-        f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks/chunk_{{chunk_id}}.fasta.transdecoder_dir/longest_orfs.pep"
+        f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.fasta.transdecoder_dir/longest_orfs.pep"
     output:
         f"{TRANSDECODER_OUT_DIR}/{{prefix}}/hmmscan/chunk_{{chunk_id}}.domtblout"
     params:
@@ -83,15 +86,15 @@ rule hmmsearch:
         '''
 
 # ───────────────────────────────────────────────
-# Rule: DIAMOND per chunk
+# Rule: DIAMOND per chunk (reads from predicted/.transdecoder_dir)
 # ───────────────────────────────────────────────
 rule diamond_blastp:
     input:
-        f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks/chunk_{{chunk_id}}.fasta.transdecoder_dir/longest_orfs.pep"
+        f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.fasta.transdecoder_dir/longest_orfs.pep"
     output:
         f"{TRANSDECODER_OUT_DIR}/{{prefix}}/blastp/chunk_{{chunk_id}}.blastp"
     params:
-        uniref90=config["uniref90"]
+        uniref90 = config["uniref90"]
     threads: 4
     log:
         f"{TRANSDECODER_LOG_DIR}/{{prefix}}/diamond_blastp/{{chunk_id}}.log"
@@ -115,7 +118,7 @@ rule diamond_blastp:
         '''
 
 # ───────────────────────────────────────────────
-# Rule: Predict per chunk
+# Rule: Predict per chunk (keeps -O predicted/)
 # ───────────────────────────────────────────────
 rule transdecoder_predict:
     input:
@@ -149,15 +152,15 @@ rule transdecoder_predict:
         '''
 
 # ───────────────────────────────────────────────
-# Rule: Aggregate
+# Rule: Aggregate merged outputs
 # ───────────────────────────────────────────────
 rule aggregate_results:
     input:
-        lambda wildcards: expand(
+        lambda wc: expand(
             f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.fasta.transdecoder.{{ext}}",
-            prefix   = wildcards.prefix,
-            chunk_id = get_chunk_ids(wildcards),
-            ext      = wildcards.ext
+            prefix   = wc.prefix,
+            chunk_id = get_chunk_ids(wc),
+            ext      = wc.ext
         )
     output:
         f"{TRANSDECODER_OUT_DIR}/merged/{{prefix}}.transdecoder.{{ext}}"
