@@ -11,7 +11,7 @@ rule isop_annotate:
         ref_im_gtf = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference_im.gtf",
     params:
         refgenome_isop_gtf = config["refgenome_isop_gtf"],
-    threads: 48
+    threads: 24
     conda: 
         SNAKEDIR + "envs/isopropeller.yaml"
     log: 
@@ -21,7 +21,6 @@ rule isop_annotate:
         set -euo pipefail
         (
             echo "## Running isoPropeller_annotate ##"
-            mkdir -p "{ANNOTATE_SUBDIRS['annot']}"
 
             isoPropeller_annotate \
                 -q "{input.isocollapse_gtf}" -r "{params.refgenome_isop_gtf}" \
@@ -51,7 +50,7 @@ rule isop_tabulate_reference:
         intron_coverage = config["intron_coverage"],
         out_prefix      = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference",
         out_prefix_im   = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference_im",
-    threads: 48
+    threads: 24
     conda: 
         SNAKEDIR + "envs/isopropeller.yaml"
     log: 
@@ -100,7 +99,6 @@ rule isop_calculate_fusion_ratios:
         set -euo pipefail
         (
             echo "## Preparing inputs for locus reconstruction ##"
-            mkdir -p "{ANNOTATE_SUBDIRS['reclocus']}"
             WORK_DIR=$(mktemp -d)
 
             sed 's/#TranscriptID/transcript_id/' "{input.iso_count_matrix}" > "${WORK_DIR}/count.txt"
@@ -173,7 +171,7 @@ rule isop_tabulate_reclocus:
         intron_coverage = config["intron_coverage"],
         out_prefix      = f"{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_reference_reclocus",
         out_prefix_im   = f"{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_reference_im_reclocus",
-    threads: 48
+    threads: 12
     conda: 
         SNAKEDIR + "envs/isopropeller.yaml"
     log: 
@@ -232,7 +230,7 @@ rule isop_integrate_orf_predictions:
         set -euo pipefail
         (
             echo "## Converting ORF predictions to GTF format ##"
-            mkdir -p "{ANNOTATE_SUBDIRS['cds']}"
+
             WORK_DIR=$(mktemp -d)
             fasta-reflow.pl "{input.gmst_fnn}" > "${WORK_DIR}/gmst.fnn"
             
@@ -307,7 +305,7 @@ rule isop_tabulate_final_cds:
         nmdj_distance   = config["nmdj_distance"],
         out_prefix      = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS",
         final_out_prefix = f"{ANNOTATE_SUBDIRS['final']}/{{prefix}}_reference_reclocus_CDS",
-    threads: 48
+    threads: 12
     conda: 
         SNAKEDIR + "envs/isopropeller.yaml"
     log: 
@@ -317,7 +315,6 @@ rule isop_tabulate_final_cds:
         set -euo pipefail
         (
             echo "## Running final tabulation and generating AA sequences ##"
-            mkdir -p "{ANNOTATE_SUBDIRS['final']}"
 
             ATTRIBUTE_LIST=$(mktemp)
             printf '%s\n' gene_name gene_type status asm_gene_id ref_gene_id ref_transcript_id \
@@ -360,7 +357,7 @@ rule asef_analysis:
         prefix_LE          = f"{ANNOTATE_SUBDIRS['asef']}/{{prefix}}_reference_reclocus_CDS_LE",
         prefix_NE          = f"{ANNOTATE_SUBDIRS['asef']}/{{prefix}}_reference_reclocus_CDS_NE",
         prefix_NCE         = f"{ANNOTATE_SUBDIRS['asef']}/{{prefix}}_reference_reclocus_CDS_NCE",
-    threads: 48
+    threads: 12
     conda: 
         SNAKEDIR + "envs/isopropeller.yaml"
     log: 
@@ -370,7 +367,6 @@ rule asef_analysis:
         set -euo pipefail
         (
             echo "## Running ASEF modules ##"
-            mkdir -p "{ANNOTATE_SUBDIRS['asef']}"
 
             ASEF_FE.pl -q "{input.reclocus_cds_gtf}" -r "{params.refgenome_isop_gtf}" \
                 -d "{params.promoter_width}" -o "{params.prefix_FE}" -e "{input.tss_bed}"
@@ -431,7 +427,7 @@ rule isop_convert_classifications:
         set -euo pipefail
         (
             echo "## Merging isoPropeller and ASEF tables for final classification ##"
-            mkdir -p "{ANNOTATE_SUBDIRS['final']}"
+
             WORK_DIR=$(mktemp -d)
 
             merge2tables.pl -t1 "{input.reclocus_cds_trns_txt}" -c1 0 \

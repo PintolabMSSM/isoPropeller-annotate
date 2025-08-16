@@ -98,11 +98,10 @@ rule all:
         f"{ANNOTATE_SUBDIRS['asef']}/{PREFIX}_reference_reclocus_CDS_NE_cds.txt"
 
 
-      # expand("03_cpatv3/{prefix}_corrected.cpatv3p18.ORF_prob.tsv", prefix=config["prefix"]),
-      # expand("04_transdecoder/{prefix}_transdecoder.check", prefix=config["prefix"]),
+      # expand("08_nmd_poison_exons/{prefix}_reference_reclocus_CDS_nmd_sj.txt", prefix=config["prefix"]),
       # expand("05_interpro/{prefix}_jobs-submitted.check", prefix=config["prefix"]),
       # expand("06_pfam/{prefix}_jobs-submitted.check", prefix=config["prefix"]),
-      # expand("08_nmd_poison_exons/{prefix}_reference_reclocus_CDS_nmd_sj.txt", prefix=config["prefix"]),
+
       # expand("09_genomic_element_overlaps/{prefix}_genomic_element_overlaps.txt", prefix=config["prefix"]),
       # expand("09_genomic_element_overlaps/{prefix}_SV_overlaps.txt", prefix=config["prefix"]),
       # expand("10_tracks/{prefix}_reference_reclocus_CDS_extra.gtf", prefix=config["prefix"]),
