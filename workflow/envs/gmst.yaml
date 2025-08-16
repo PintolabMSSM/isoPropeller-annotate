@@ -1,0 +1,11 @@
+name: gmst
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - perl>=5.32
+  - coreutils
+  - gzip
+  - pigz
+  - parallel

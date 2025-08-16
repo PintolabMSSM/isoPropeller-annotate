@@ -53,6 +53,7 @@ shell_perl5lib   = config["utility_perl5lib"]
 include: "rules/01_isoform-counts.smk"
 include: "rules/02_ORF_prediction_cpatv3.smk"
 include: "rules/02_ORF_prediction_transdecoder.smk"
+include: "rules/02_ORF_prediction_gmst.smk"
 #include: "rules/03_interpro.smk"
 #include: "rules/04_pfam.smk"
 #include: "rules/05_annotate.smk"
@@ -67,14 +68,18 @@ include: "rules/02_ORF_prediction_transdecoder.smk"
 #include: "rules/14_squanti3.smk"
 
 rule all:
-   input: 
-      expand("01_isoform_counts/{prefix}_isoform-counts.txt", prefix=config["prefix"]),
-      expand("02_ORF_prediction/cpat_prob/{prefix}_corrected.cpatv3p18.ORF_seqs.fa", prefix=config["prefix"]),
-      expand("02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.ORF_seqs.fa", prefix=config["prefix"]),
-      expand("02_ORF_prediction/transdecoder/merged/{prefix}.transdecoder.pep",      prefix=config["prefix"]),
-      expand("02_ORF_prediction/transdecoder/merged/{prefix}.transdecoder.cds",      prefix=config["prefix"]),
-      expand("02_ORF_prediction/transdecoder/merged/{prefix}.transdecoder.gff3",     prefix=config["prefix"]),
-      expand("02_ORF_prediction/transdecoder/merged/{prefix}.transdecoder.bed",      prefix=config["prefix"]),
+    input: 
+        expand("01_isoform_counts/{prefix}_isoform-counts.txt",                        prefix=config["prefix"]),
+        expand("02_ORF_prediction/cpat_prob/{prefix}_corrected.cpatv3p18.ORF_seqs.fa", prefix=config["prefix"]),
+        expand("02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.ORF_seqs.fa", prefix=config["prefix"]),
+        expand("02_ORF_prediction/transdecoder/merged/{prefix}.transdecoder.pep",      prefix=config["prefix"]),
+        expand("02_ORF_prediction/transdecoder/merged/{prefix}.transdecoder.cds",      prefix=config["prefix"]),
+        expand("02_ORF_prediction/transdecoder/merged/{prefix}.transdecoder.gff3",     prefix=config["prefix"]),
+        expand("02_ORF_prediction/transdecoder/merged/{prefix}.transdecoder.bed",      prefix=config["prefix"]),
+        expand("02_ORF_prediction/gmst/merged/{prefix}.gmst.faa",                      prefix=config["prefix"]),
+        expand("02_ORF_prediction/gmst/merged/{prefix}.gmst.fnn",                      prefix=config["prefix"]),
+        expand("02_ORF_prediction/gmst/merged/{prefix}.gmst.gff3",                     prefix=config["prefix"]),
+
 
 
       # expand("03_cpatv3/{prefix}_corrected.cpatv3p18.ORF_prob.tsv", prefix=config["prefix"]),
