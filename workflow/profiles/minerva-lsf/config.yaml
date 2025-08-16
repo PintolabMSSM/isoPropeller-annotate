@@ -19,3 +19,12 @@ default-resources:
   lsf_extra:    "-oo clusterlogs/%J.OU"
 
 # --- Define rule-specific resources --- #
+set-resources:
+
+  isop_tabulate_reference:
+    mem_mb:     90000
+    runtime:    360
+
+  isop_tabulate_reclocus:
+    mem_mb:     90000
+    runtime:    360

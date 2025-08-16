@@ -54,11 +54,12 @@ GMST_LOG_DIR = f"logs/{GMST_OUT_DIR}"
 # Annotate output folders
 ANNOTATE_DIR = "03_annotate"
 ANNOTATE_SUBDIRS = {
-    "annot":    f"{ANNOTATE_DIR}/01_annotation",
-    "reclocus": f"{ANNOTATE_DIR}/02_reclocus",
-    "cds":      f"{ANNOTATE_DIR}/03_cds_integration",
-    "asef":     f"{ANNOTATE_DIR}/04_asef",
-    "final":    f"{ANNOTATE_DIR}/05_final"
+    "annot":       f"{ANNOTATE_DIR}/A_annotation",
+    "reclocus":    f"{ANNOTATE_DIR}/B_reclocus",
+    "cds":         f"{ANNOTATE_DIR}/C_cds_integration",
+    "asef":        f"{ANNOTATE_DIR}/D_ASEF",
+    "final":       f"{ANNOTATE_DIR}/E_final",
+    "poison_exon": f"{ANNOTATE_DIR}/F_poison_exons"
 }
 
 
@@ -95,8 +96,8 @@ rule all:
         # --- Step 03: Annotation & Analysis ---
         f"{ANNOTATE_SUBDIRS['final']}/{PREFIX}_reference_reclocus_refined.txt",
         f"{ANNOTATE_SUBDIRS['final']}/{PREFIX}_reference_reclocus_CDS_aa.fa",
-        f"{ANNOTATE_SUBDIRS['asef']}/{PREFIX}_reference_reclocus_CDS_NE_cds.txt"
-
+        f"{ANNOTATE_SUBDIRS['asef']}/{PREFIX}_reference_reclocus_CDS_NE_cds.txt",
+        f"{ANNOTATE_SUBDIRS['poison_exon']}/{PREFIX}_nmd_sj_parsed.txt",
 
       # expand("08_nmd_poison_exons/{prefix}_reference_reclocus_CDS_nmd_sj.txt", prefix=config["prefix"]),
       # expand("05_interpro/{prefix}_jobs-submitted.check", prefix=config["prefix"]),

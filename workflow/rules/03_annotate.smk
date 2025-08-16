@@ -409,7 +409,7 @@ rule asef_comparison:
         '''
 
 # ───────────────────────────────────────────────
-# 11. Final Classification Conversion
+# 11. Classification Conversion
 # ───────────────────────────────────────────────
 rule isop_convert_classifications:
     message: "Merging tables and converting final classifications"
@@ -436,5 +436,45 @@ rule isop_convert_classifications:
             classification_conversion.pl "${WORK_DIR}/merged.txt" "{output.reclocus_refined}"
             
             rm -r "$WORK_DIR"
+        ) &> "{log}"
+        '''
+
+# ───────────────────────────────────────────────
+# 12. Identify Poison Exons
+# ───────────────────────────────────────────────
+rule identify_poison_exons:
+    message: "Identifying poison exons using NMD splice junction finder"
+    input:
+        reclocus_cds_gtf = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS.gtf",
+    output:
+        parsed_junctions = f"{ANNOTATE_SUBDIRS['poison_exon']}/{{prefix}}_nmd_sj_parsed.txt",
+    params:
+        nmdj_min_cds_len = config["nmdj_min_cds_len"],
+        nmdj_distance    = config["nmdj_distance"],
+        out_prefix       = f"{ANNOTATE_SUBDIRS['poison_exon']}/{{prefix}}_reference_reclocus_CDS",
+    threads: 8
+    conda: 
+        SNAKEDIR + "envs/isopropeller.yaml"
+    log: 
+        f"logs/{ANNOTATE_SUBDIRS['poison_exon']}/{{prefix}}_poison-exons.log"
+    shell:
+        r'''
+        (
+            echo "## Running NMD splice junction finder and parser ##"
+            mkdir -p "{ANNOTATE_SUBDIRS['poison_exon']}"
+
+            # Step 1: Find splice junctions that could trigger NMD
+            nmd_splice_junction_finder.pl \
+                -i "{input.reclocus_cds_gtf}" \
+                -o "{params.out_prefix}" \
+                -s 1 \
+                -m "{params.nmdj_min_cds_len}" \
+                -n "{params.nmdj_distance}" \
+                -t {threads}
+
+            # Step 2: Parse the output from the finder script
+            nmd_splice_junction_parser.pl \
+                "{params.out_prefix}_nmd_sj_per_transcript.txt" \
+                "{output.parsed_junctions}"
         ) &> "{log}"
         '''
