@@ -39,7 +39,7 @@ rule gmst_per_chunk:
         cds = f"{GMST_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.gmst.fnn",
         gff = f"{GMST_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.gmst.gff",
     params:
-        out_basename = "chunk.gmst",  # safe because each job runs in its own shadow dir
+        out_basename = "gmst_out",  # local name inside the shadow dir
         gmst_exe     = SNAKEDIR + "../bin/gmst/gmst.pl",
         gmst_bindir  = SNAKEDIR + "../bin/gmst/",
     threads: 1
@@ -52,13 +52,13 @@ rule gmst_per_chunk:
         r'''
         set -euo pipefail
         (
-            echo "## GMST (SQANTI3 params + GFF) chunk {wildcards.chunk_id} ({wildcards.prefix})"
+            echo "## GMST (SQANTI3+GFF) chunk {wildcards.chunk_id} ({wildcards.prefix})"
             echo "Input : {input.fa}"
-            echo "Out basename: {params.out_basename}"
+            echo "Shadow CWD: $(pwd)"
 
             export PATH="{params.gmst_bindir}:$PATH"
 
-            # Run in the shadow dir; Snakemake will move declared outputs after success
+            # Run GMST in the shadow dir
             perl "{params.gmst_exe}" \
                 -faa \
                 --strand direct \
@@ -67,15 +67,20 @@ rule gmst_per_chunk:
                 --output "{params.out_basename}" \
                 "{input.fa}"
 
-            # Rename to the basenames of declared outputs so Snakemake picks them up
-            mv -f "{params.out_basename}"     "$(basename "{output.gff}")"
-            mv -f "{params.out_basename}.faa" "$(basename "{output.pep}")"
-            mv -f "{params.out_basename}.fnn" "$(basename "{output.cds}")"
+            # Ensure the relative output directories exist in the shadow dir
+            mkdir -p "$(dirname "{output.pep}")"
+            mkdir -p "$(dirname "{output.cds}")"
+            mkdir -p "$(dirname "{output.gff}")"
+
+            # Move GMST outputs to the EXACT relative paths Snakemake declared
+            mv -f "{params.out_basename}.faa" "{output.pep}"
+            mv -f "{params.out_basename}.fnn" "{output.cds}"
+            mv -f "{params.out_basename}"     "{output.gff}"
 
             # Sanity checks
-            test -s "$(basename "{output.gff}")"
-            test -s "$(basename "{output.pep}")"
-            test -s "$(basename "{output.cds}")"
+            test -s "{output.pep}"
+            test -s "{output.cds}"
+            test -s "{output.gff}"
         ) &> "{log}"
         '''
 
@@ -83,6 +88,9 @@ rule gmst_per_chunk:
 # ───────────────────────────────────────────────
 # Rule: Aggregate merged outputs per prefix
 # ───────────────────────────────────────────────
+ruleorder:
+    gmst_aggregate > get_isoform_fasta
+
 rule gmst_aggregate:
     input:
         pep_chunks = lambda wc: expand(
