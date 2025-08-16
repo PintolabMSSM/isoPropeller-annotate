@@ -86,11 +86,11 @@ rule run_cpat3_len:
     input:
         isop_fasta       = "02_ORF_prediction/{prefix}_ORFpred-input.fasta",
     output:
-        cpat_prob_seqs   = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.ORF_seqs.fa",
-        cpat_prob        = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.ORF_prob.tsv",
-        cpat_prob_best   = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.ORF_prob.best.tsv",
-        cpat_prob_no_orf = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.no_ORF.txt",
-        cpat_prob_log    = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.log",
+        cpat_leng_seqs   = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.ORF_seqs.fa",
+        cpat_leng        = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.ORF_prob.tsv",
+        cpat_leng_best   = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.ORF_prob.best.tsv",
+        cpat_leng_no_orf = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.no_ORF.txt",
+        cpat_leng_log    = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.log",
     threads: 4
     params:
         cpat_outprefix      = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18",
@@ -116,7 +116,7 @@ rule run_cpat3_len:
                --top-orf=5 \
                --min-orf={params.minorf_cpat3} \
                --best-orf=l \
-               --log-file="{output.cpat_prob_log}" \
+               --log-file="{output.cpat_leng_log}" \
                -o "{params.cpat_outprefix}"
         ) &> "{log}"
         '''

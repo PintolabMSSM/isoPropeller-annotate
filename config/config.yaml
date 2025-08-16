@@ -62,6 +62,7 @@ cpat_prebuilt_logit:      /sc/arion/work/pintod02/opt/isoseq_pipeline/cpat_prebu
 cpat_prebuilt_hex:        /sc/arion/work/pintod02/opt/isoseq_pipeline/cpat_prebuilt_models/Human_Hexamer.tsv
 sv_ctrl:                  /sc/arion/work/pintod02/opt/isoseq_pipeline/data/gnomad_v2.1_sv.controls_only.sites.chrStartEndName.hg38.bed
 sv_nneu:                  /sc/arion/work/pintod02/opt/isoseq_pipeline/data/gnomad_v2.1_sv.nonneuro.sites.chrStartEndName.hg38.bed
+pfam_db:                  /sc/arion/projects/bakellab/reference-databases/pfam
 pfam_a_hmm:               /sc/arion/projects/bakellab/reference-databases/pfam/Pfam-A.hmm
 uniprot_sprot:            /sc/arion/projects/pintod02c/reference-databases/uniprot-sprot/uniprot_sprot.fasta
 uniref90:                 /sc/arion/projects/pintod02c/reference-databases/uniprot-sprot/uniref90.fasta

@@ -4,10 +4,6 @@
 # ENVIRONMENT #
 ###############
 
-# Set paths from snakemake parameters
-export PATH="${snakemake_params[path]}:${snakemake_params[path_maptools]}:$PATH"
-export PERL5LIB="${snakemake_params[perl5lib]}:$PERL5LIB"
-
 # Set aliases
 shopt -s expand_aliases
 alias awkt="awk -F '\t' -v OFS='\t'"
@@ -34,14 +30,14 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
 } 2>&1 | tee -a ${snakemake_log[out]}
 
 
-#----------#
-# Run NIAP #
-#----------#
+#------------------------#
+# Run isoPropeller merge #
+#------------------------#
 {
    
    # Annotation
-   NIAP_annotate.pl -q ${snakemake_input[isocollapse_gtf]} -r ${snakemake_params[refgenome_niap_gtf]} -o ${snakemake_output[ref_gtf]} -t ${snakemake[threads]} -e ${snakemake_input[tss_bed]}
-   NIAP_annotate.pl -q ${snakemake_input[isocollapse_gtf]} -r ${snakemake_params[refgenome_niap_gtf]} -o ${snakemake_output[ref_im_gtf]} -t ${snakemake[threads]} -m -e ${snakemake_input[tss_bed]}
+   isoPropeller_annotate -q ${snakemake_input[isocollapse_gtf]} -r ${snakemake_params[refgenome_isop_gtf]} -o ${snakemake_output[ref_gtf]} -t ${snakemake[threads]} -e ${snakemake_input[tss_bed]}
+   isoPropeller_annotate -q ${snakemake_input[isocollapse_gtf]} -r ${snakemake_params[refgenome_isop_gtf]} -o ${snakemake_output[ref_im_gtf]} -t ${snakemake[threads]} -m -e ${snakemake_input[tss_bed]}
 
    # Tabulation   
    for attribute in `echo gene_name gene_type status asm_gene_id ref_transcript_id ref_gene_id ref_gene_name ref_gene_type`; do echo $attribute; done > ${FILE_PREFIX}_temp_attribute_list.txt
@@ -49,7 +45,7 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
    gtf2summary.pl -i ${snakemake_output[ref_im_gtf]} -o ${FILE_PREFIX}_reference_im -a ${FILE_PREFIX}_temp_attribute_list.txt -g ${snakemake_params[refgenome_fasta]} -j ${snakemake_params[intron_coverage]} -r -t ${snakemake[threads]}
 
    # Locus reconstruction
-   sed 's/#TranscriptID/transcript_id/' ${snakemake_input[niap_merge_counts]} > ${FILE_PREFIX}_temp_count.txt
+   sed 's/#TranscriptID/transcript_id/' ${snakemake_input[isop_merge_counts]} > ${FILE_PREFIX}_temp_count.txt
    merge2tables.pl -t1 ${snakemake_output[ref_trns_txt]} -c1 0 -t2 ${FILE_PREFIX}_temp_count.txt -c2 0 -o ${FILE_PREFIX}_temp_merged.txt -s
    head -1 ${FILE_PREFIX}_temp_count.txt | sed 's/\t/\n/g' | tail -n+2 > ${FILE_PREFIX}_temp_sample.txt
    fusion_gene_exp_ratio.pl ${snakemake_output[ref_gtf]} ${FILE_PREFIX}_temp_merged.txt ${FILE_PREFIX}_temp_sample.txt ${FILE_PREFIX}
@@ -61,8 +57,8 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
    cp ${FILE_PREFIX}*_fusion_gene_ratio.txt ${FILE_PREFIX}_RECLOCUS_DEBUGOUTPUT_fusion_gene_ratio.txt
    reconstructed_locus.R ${FILE_PREFIX} ${snakemake_input[trackgroups]} 
    cat ${FILE_PREFIX}_reclocus_*_gene_id.txt | sort | uniq > ${snakemake_output[reclocus_id]}
-   gtf_reclocus.pl ${snakemake_output[ref_gtf]} ${snakemake_params[refgenome_niap_gtf]} ${snakemake_output[reclocus_id]} ${snakemake_output[reclocus_gtf]}
-   gtf_reclocus.pl ${snakemake_output[ref_im_gtf]} ${snakemake_params[refgenome_niap_gtf]} ${snakemake_output[reclocus_id]} ${snakemake_output[reclocus_im_gtf]}
+   gtf_reclocus.pl ${snakemake_output[ref_gtf]} ${snakemake_params[refgenome_isop_gtf]} ${snakemake_output[reclocus_id]} ${snakemake_output[reclocus_gtf]}
+   gtf_reclocus.pl ${snakemake_output[ref_im_gtf]} ${snakemake_params[refgenome_isop_gtf]} ${snakemake_output[reclocus_id]} ${snakemake_output[reclocus_im_gtf]}
 
    # Tabulation   
    for attribute in `echo gene_name gene_type status asm_gene_id ref_transcript_id ref_gene_id ref_gene_name ref_gene_type reclocus`; do echo $attribute; done > ${FILE_PREFIX}_temp_attribute_list.txt
@@ -72,16 +68,16 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
 
    # Select the best prediction from GMST result
    cp ${snakemake_output[reclocus_gtf]} ${FILE_PREFIX}_RECLOCUS_DEBUGOUTPUT_gmst_fnn.gtf
-   cp ${snakemake_input[sq3_fasta]}     ${FILE_PREFIX}_RECLOCUS_DEBUGOUTPUT_sq3_fasta.fasta
-   cp ${snakemake_params[gmst_fnn]}     ${FILE_PREFIX}_RECLOCUS_DEBUGOUTPUT_gmst_fnn.fnn
-   fasta-reflow.pl  ${snakemake_params[gmst_fnn]} > ${FILE_PREFIX}_gmst.fnn
-   GMST2gtf.pl -g ${snakemake_output[reclocus_gtf]} -r ${FILE_PREFIX}_gmst.fnn -f ${snakemake_input[sq3_fasta]} -o ${FILE_PREFIX}_reference_reclocus_GMST_CDS -n ${snakemake_params[nmdj_distance]} -e ${snakemake_params[tis_efficiency]}
+   cp ${snakemake_input[isop_fasta]}     ${FILE_PREFIX}_RECLOCUS_DEBUGOUTPUT_isop_fasta.fasta
+   cp ${snakemake_input[gmst_fnn]}     ${FILE_PREFIX}_RECLOCUS_DEBUGOUTPUT_gmst_fnn.fnn
+   fasta-reflow.pl  ${snakemake_input[gmst_fnn]} > ${FILE_PREFIX}_gmst.fnn
+   GMST2gtf.pl -g ${snakemake_output[reclocus_gtf]} -r ${FILE_PREFIX}_gmst.fnn -f ${snakemake_input[isop_fasta]} -o ${FILE_PREFIX}_reference_reclocus_GMST_CDS -n ${snakemake_params[nmdj_distance]} -e ${snakemake_params[tis_efficiency]}
 
    # Select the best prediction from CPAT result
-   CPAT2gtf.pl -g ${snakemake_output[reclocus_gtf]} -f ${snakemake_input[sq3_fasta]} -p ${snakemake_input[cpat_leng]} -s ${snakemake_input[cpat_leng_seqs]} -o ${FILE_PREFIX}_reference_reclocus_CPAT_CDS -n ${snakemake_params[nmdj_distance]} -e ${snakemake_params[tis_efficiency]}
+   CPAT2gtf.pl -g ${snakemake_output[reclocus_gtf]} -f ${snakemake_input[isop_fasta]} -p ${snakemake_input[cpat_leng]} -s ${snakemake_input[cpat_leng_seqs]} -o ${FILE_PREFIX}_reference_reclocus_CPAT_CDS -n ${snakemake_params[nmdj_distance]} -e ${snakemake_params[tis_efficiency]}
 
    # Select the best prediction from Transdecoder
-   transdecoder2gtf.pl -g ${snakemake_output[reclocus_gtf]} -f ${snakemake_input[sq3_fasta]} -r ${snakemake_params[transdecoder]} -o ${FILE_PREFIX}_reference_reclocus_transdecoder_CDS -n ${snakemake_params[nmdj_distance]} -e ${snakemake_params[tis_efficiency]}
+   transdecoder2gtf.pl -g ${snakemake_output[reclocus_gtf]} -f ${snakemake_input[isop_fasta]} -r ${snakemake_input[transdecoder]} -o ${FILE_PREFIX}_reference_reclocus_transdecoder_CDS -n ${snakemake_params[nmdj_distance]} -e ${snakemake_params[tis_efficiency]}
 
    # Select the best prediction among tools
    echo "${FILE_PREFIX}_reference_reclocus_GMST_CDS"$'\t'"GMST" > ${FILE_PREFIX}_temp_prediction_list.txt
@@ -112,7 +108,7 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
    # First exon of multiexonic isoforms
    ASEF_FE.pl \
       -q ${snakemake_output[reclocus_cds_gtf]} \
-      -r ${snakemake_params[refgenome_niap_gtf]} \
+      -r ${snakemake_params[refgenome_isop_gtf]} \
       -d ${snakemake_params[promoter_width]} \
       -o ${FILE_PREFIX}_reference_reclocus_CDS_FE \
       -e ${snakemake_input[tss_bed]}
@@ -120,14 +116,14 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
    # Last exon of multiexonic isoforms
    ASEF_LE.pl \
       -q ${snakemake_output[reclocus_cds_gtf]} \
-      -r ${snakemake_params[refgenome_niap_gtf]} \
+      -r ${snakemake_params[refgenome_isop_gtf]} \
       -o ${FILE_PREFIX}_reference_reclocus_CDS_LE \
       -e ${snakemake_input[tts_bed]}
    
    # Novel exon of multiexonic isoforms
    ASEF_NE.pl \
       -q ${snakemake_output[reclocus_cds_gtf]} \
-      -r ${snakemake_params[refgenome_niap_gtf]} \
+      -r ${snakemake_params[refgenome_isop_gtf]} \
       -j ${snakemake_params[intron_coverage]} \
       -i \
       -o ${FILE_PREFIX}_reference_reclocus_CDS_NE \
@@ -137,7 +133,7 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
    ASEF_NCE.pl \
       -q ${snakemake_output[reclocus_cds_gtf]} \
       -p \
-      -r ${snakemake_params[refgenome_niap_gtf]} \
+      -r ${snakemake_params[refgenome_isop_gtf]} \
       -o ${FILE_PREFIX}_reference_reclocus_CDS_NCE \
       -t ${snakemake[threads]}
    
@@ -156,7 +152,7 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
 #-------------------------#
 {
    
-   # Merge NIAP and ASEF tables
+   # Merge isoPropeller and ASEF tables
    merge2tables.pl \
       -t1 ${snakemake_output[reclocus_cds_trns_txt]} \
       -c1 0 \
@@ -166,7 +162,7 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
       -s
    
    # Convert classifications
-   NIAP_classification_conversion.pl \
+   classification_conversion.pl \
       ${FILE_PREFIX}_temp_merged.txt \
       ${snakemake_output[reclocus_refined]}
 
