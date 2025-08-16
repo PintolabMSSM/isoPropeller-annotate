@@ -31,7 +31,7 @@ checkpoint gmst_split_fasta:
 # ───────────────────────────────────────────────
 # Rule: GMST per chunk (using Snakemake `shadow`)
 # ───────────────────────────────────────────────
- rule gmst_per_chunk:
+rule gmst_per_chunk:
     input:
         fa = f"{GMST_OUT_DIR}/{{prefix}}/chunks/chunk_{{chunk_id}}.fasta"
     output:
