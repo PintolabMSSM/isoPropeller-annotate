@@ -93,9 +93,9 @@ rule all:
         f"{GMST_OUT_DIR}/merged/{PREFIX}.gmst.gff3",
 
         # --- Step 03: Annotation & Analysis ---
-#        f"{ANNOTATE_SUBDIRS['final']}/{PREFIX}_reference_reclocus_refined.txt",
-#        f"{ANNOTATE_SUBDIRS['final']}/{PREFIX}_reference_reclocus_CDS_aa.fa",
-#        f"{ANNOTATE_SUBDIRS['asef']}/{PREFIX}_reference_reclocus_CDS_NE_cds.txt"
+        f"{ANNOTATE_SUBDIRS['final']}/{PREFIX}_reference_reclocus_refined.txt",
+        f"{ANNOTATE_SUBDIRS['final']}/{PREFIX}_reference_reclocus_CDS_aa.fa",
+        f"{ANNOTATE_SUBDIRS['asef']}/{PREFIX}_reference_reclocus_CDS_NE_cds.txt"
 
 
       # expand("03_cpatv3/{prefix}_corrected.cpatv3p18.ORF_prob.tsv", prefix=config["prefix"]),

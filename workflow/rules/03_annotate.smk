@@ -12,8 +12,10 @@ rule isop_annotate:
     params:
         refgenome_isop_gtf = config["refgenome_isop_gtf"],
     threads: 48
-    conda: "envs/isoPropeller.yaml"
-    log: f"logs/{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_isop-annotate.log"
+    conda: 
+        SNAKEDIR + "envs/isopropeller.yaml"
+    log: 
+        f"logs/{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_isop-annotate.log"
     shell:
         r'''
         set -euo pipefail
@@ -50,8 +52,10 @@ rule isop_tabulate_reference:
         out_prefix      = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference",
         out_prefix_im   = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference_im",
     threads: 48
-    conda: "envs/isoPropeller.yaml"
-    log: f"logs/{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_isop-tabulate-ref.log"
+    conda: 
+        SNAKEDIR + "envs/isopropeller.yaml"
+    log: 
+        f"logs/{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_isop-tabulate-ref.log"
     shell:
         r'''
         set -euo pipefail
@@ -78,17 +82,19 @@ rule isop_tabulate_reference:
 rule isop_calculate_fusion_ratios:
     message: "Calculating fusion gene ratios for locus reconstruction"
     input:
-        ref_gtf         = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference.gtf",
-        ref_trns_txt    = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference_transcript.txt",
-        ref_im_trns_txt = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference_im_transcript.txt",
-        isop_merge_counts = "{prefix}.counts",
+        ref_gtf          = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference.gtf",
+        ref_trns_txt     = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference_transcript.txt",
+        ref_im_trns_txt  = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference_im_transcript.txt",
+        iso_count_matrix = "01_isoform_counts/{prefix}_isoform-counts.txt"
     output:
         fusion_ratio = f"{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_fusion_gene_ratio.txt",
         fusion_mono  = f"{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_fusion_monoexonic_gene_id.txt",
     params:
         prefix = f"{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}", # Note: script uses this as a prefix for other outputs
-    conda: "envs/isoPropeller.yaml"
-    log: f"logs/{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_isop-fusion-ratio.log"
+    conda: 
+        SNAKEDIR + "envs/isopropeller.yaml"
+    log: 
+        f"logs/{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_isop-fusion-ratio.log"
     shell:
         r'''
         set -euo pipefail
@@ -97,7 +103,7 @@ rule isop_calculate_fusion_ratios:
             mkdir -p "{ANNOTATE_SUBDIRS['reclocus']}"
             WORK_DIR=$(mktemp -d)
 
-            sed 's/#TranscriptID/transcript_id/' "{input.isop_merge_counts}" > "${WORK_DIR}/count.txt"
+            sed 's/#TranscriptID/transcript_id/' "{input.iso_count_matrix}" > "${WORK_DIR}/count.txt"
             merge2tables.pl -t1 "{input.ref_trns_txt}" -c1 0 -t2 "${WORK_DIR}/count.txt" -c2 0 -o "${WORK_DIR}/merged.txt" -s
             head -1 "${WORK_DIR}/count.txt" | sed 's/\t/\n/g' | tail -n+2 > "${WORK_DIR}/sample.txt"
             
@@ -131,8 +137,10 @@ rule isop_run_reclocus:
     params:
         prefix             = f"{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}",
         refgenome_isop_gtf = config["refgenome_isop_gtf"],
-    conda: "envs/isoPropeller.yaml"
-    log: f"logs/{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_isop-reclocus.log"
+    conda: 
+        SNAKEDIR + "envs/isopropeller.yaml"
+    log: 
+        f"logs/{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_isop-reclocus.log"
     shell:
         r'''
         set -euo pipefail
@@ -166,8 +174,10 @@ rule isop_tabulate_reclocus:
         out_prefix      = f"{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_reference_reclocus",
         out_prefix_im   = f"{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_reference_im_reclocus",
     threads: 48
-    conda: "envs/isoPropeller.yaml"
-    log: f"logs/{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_isop-tabulate-reclocus.log"
+    conda: 
+        SNAKEDIR + "envs/isopropeller.yaml"
+    log: 
+        f"logs/{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_isop-tabulate-reclocus.log"
     shell:
         r'''
         set -euo pipefail
@@ -213,8 +223,10 @@ rule isop_integrate_orf_predictions:
         transdecoder_prefix = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_transdecoder_CDS",
         nmdj_distance       = config["nmdj_distance"],
         tis_efficiency      = os.path.join(workflow.basedir, "../resources/TIS_efficiency.txt"),
-    conda: "envs/isoPropeller.yaml"
-    log: f"logs/{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_isop-integrate-orf.log"
+    conda: 
+        SNAKEDIR + "envs/isopropeller.yaml"
+    log: 
+        f"logs/{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_isop-integrate-orf.log"
     shell:
         r'''
         set -euo pipefail
@@ -254,8 +266,10 @@ rule isop_select_best_cds:
         gmst_prefix         = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_GMST_CDS",
         cpat_prefix         = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CPAT_CDS",
         transdecoder_prefix = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_transdecoder_CDS",
-    conda: "envs/isoPropeller.yaml"
-    log: f"logs/{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_isop-select-cds.log"
+    conda: 
+        SNAKEDIR + "envs/isopropeller.yaml"
+    log: 
+        f"logs/{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_isop-select-cds.log"
     shell:
         r'''
         set -euo pipefail
@@ -294,8 +308,10 @@ rule isop_tabulate_final_cds:
         out_prefix      = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS",
         final_out_prefix = f"{ANNOTATE_SUBDIRS['final']}/{{prefix}}_reference_reclocus_CDS",
     threads: 48
-    conda: "envs/isoPropeller.yaml"
-    log: f"logs/{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_isop-tabulate-final.log"
+    conda: 
+        SNAKEDIR + "envs/isopropeller.yaml"
+    log: 
+        f"logs/{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_isop-tabulate-final.log"
     shell:
         r'''
         set -euo pipefail
@@ -345,8 +361,10 @@ rule asef_analysis:
         prefix_NE          = f"{ANNOTATE_SUBDIRS['asef']}/{{prefix}}_reference_reclocus_CDS_NE",
         prefix_NCE         = f"{ANNOTATE_SUBDIRS['asef']}/{{prefix}}_reference_reclocus_CDS_NCE",
     threads: 48
-    conda: "envs/isoPropeller.yaml"
-    log: f"logs/{ANNOTATE_SUBDIRS['asef']}/{{prefix}}_asef-analysis.log"
+    conda: 
+        SNAKEDIR + "envs/isopropeller.yaml"
+    log: 
+        f"logs/{ANNOTATE_SUBDIRS['asef']}/{{prefix}}_asef-analysis.log"
     shell:
         r'''
         set -euo pipefail
@@ -378,8 +396,10 @@ rule asef_comparison:
         reclocus_NE_gtf  = f"{ANNOTATE_SUBDIRS['asef']}/{{prefix}}_reference_reclocus_CDS_NE_exon.gtf",
     output:
         reclocus_NECDS = f"{ANNOTATE_SUBDIRS['asef']}/{{prefix}}_reference_reclocus_CDS_NE_cds.txt",
-    conda: "envs/isoPropeller.yaml"
-    log: f"logs/{ANNOTATE_SUBDIRS['asef']}/{{prefix}}_asef-comparison.log"
+    conda: 
+        SNAKEDIR + "envs/isopropeller.yaml"
+    log: 
+        f"logs/{ANNOTATE_SUBDIRS['asef']}/{{prefix}}_asef-comparison.log"
     shell:
         r'''
         set -euo pipefail
@@ -402,8 +422,10 @@ rule isop_convert_classifications:
         asef_ne_trns_txt      = f"{ANNOTATE_SUBDIRS['asef']}/{{prefix}}_reference_reclocus_CDS_NE_transcript.txt",
     output:
         reclocus_refined = f"{ANNOTATE_SUBDIRS['final']}/{{prefix}}_reference_reclocus_refined.txt",
-    conda: "envs/isoPropeller.yaml"
-    log: f"logs/{ANNOTATE_SUBDIRS['final']}/{{prefix}}_isop-convert-class.log"
+    conda: 
+        SNAKEDIR + "envs/isopropeller.yaml"
+    log: 
+        f"logs/{ANNOTATE_SUBDIRS['final']}/{{prefix}}_isop-convert-class.log"
     shell:
         r'''
         set -euo pipefail
