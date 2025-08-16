@@ -25,12 +25,14 @@ rule get_isoform_fasta:
             gtf2gff.pl "{input.isop_gtf}"  > "{output.isop_gff}"
             gff2bed.pl "{output.isop_gff}" > "{output.isop_bed}"
 
-            # Use bedtools getfasta to extract isoform sequences (strand-specific, spliced)
+            # Run bedtools and pipe its output to sed for header cleaning
             bedtools getfasta \
                 -fi  "{input.refgenome_fasta}" \
                 -bed "{output.isop_bed}" \
-                -fo  "{output.isop_fasta}" \
-                -s -split -name
+                -s -split \
+                -nameOnly \
+            | sed '/^>/ s/\s*(.*)//' > "{output.isop_fasta}"
+
         ) &> "{log}"
         '''
 
