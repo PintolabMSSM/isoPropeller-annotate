@@ -1,16 +1,13 @@
 # ───────────────────────────────────────────────
 # Local variables / imports
 # ───────────────────────────────────────────────
-import os
-
-TRANSDECODER_OUT_DIR = "02_ORF_prediction/transdecoder"
-TRANSDECODER_LOG_DIR = f"logs/{TRANSDECODER_OUT_DIR}"
 
 # Helper: resolve chunk ids produced by the checkpoint
 def get_chunk_ids(wildcards):
     checkpoint_output = checkpoints.split_fasta.get(prefix=wildcards.prefix).output[0]
     with open(os.path.join(checkpoint_output, "chunk_ids.txt"), "r") as f:
         return f.read().strip().split("\n")
+
 
 # ───────────────────────────────────────────────
 # Checkpoint: split fasta

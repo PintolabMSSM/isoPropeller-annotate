@@ -45,7 +45,7 @@ isoswitch_min_count:      5000
 refgenome_dir:            /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC
 refgenome_fasta:          /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/GRCh38.primary_assembly.genome.fa
 refgenome_gtf:            /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/gencode.v41.annotation_no-mi-sn-sno-sca-RNAs.gtf
-refgenome_niap_gtf:       /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/gencode.v41.annotation_cleaned.gtf
+refgenome_isop_gtf:       /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/gencode.v41.annotation_cleaned.gtf
 refgenome_anno:           /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/gencode.v41.annotation.anno
 refgenome_rmsk_bed:       /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/GRCh38.primary_assembly.genome_rmsk_nr.bed
 refgenome_rmsk_sel_bed:   /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/GRCh38.primary_assembly.genome_rmsk_LINE-SINE-LTR-DNA.bed

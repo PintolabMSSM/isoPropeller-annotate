@@ -1,11 +1,6 @@
 # ───────────────────────────────────────────────
 # Local variables / imports
 # ───────────────────────────────────────────────
-import os
-
-GMST_OUT_DIR = "02_ORF_prediction/gmst"
-GMST_LOG_DIR = f"logs/{GMST_OUT_DIR}"
-
 def get_gmst_chunk_ids(wildcards):
     checkpoint_output = checkpoints.gmst_split_fasta.get(prefix=wildcards.prefix).output[0]
     with open(os.path.join(checkpoint_output, "chunk_ids.txt"), "r") as f:

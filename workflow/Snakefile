@@ -18,7 +18,7 @@ from collections import defaultdict
 min_snakemake_version = "8.25.0"
 
 # Set snakemake main workdir variable. 
-SNAKEDIR = os.path.dirname(workflow.snakefile) + "/"
+SNAKEDIR = workflow.basedir + '/'
 
 # Load configuration from config file
 configfile: SNAKEDIR + "../config/config.yaml"
@@ -37,13 +37,29 @@ def as_bool(val):
     return False
 
 
-# Set path variables to pass to bash scripts
-shell_path       = expand("{util}:{ngs}:{igb}:{iso}:{lsf}:{sq3}/cDNA_Cupcake/sequence/:{sq3}cDNA_Cupcake/annotation/", 
-                          util=config["utility_path"],  ngs=config["ngs_tools_path"],   igb=config["track_tools_path"],  
-                          iso=config["isoseq_pipeline_path"],  sq3=config["sqanti_path"], lsf=config["minerva_queue_lsf_path"])
-shell_maptools   = expand("{maptools}/NIAP/script/:{maptools}/ASEF/script/:{maptools}/poison_exon/script/:{maptools}/NIAP_classification_conversion/script/:{maptools}/CPAT_conversion/script/:{maptools}/reconstructed_locus/script/:{maptools}/CDS_prediction/script/",
-                          maptools=config["isoseq_map_analysis_path"])
-shell_perl5lib   = config["utility_perl5lib"]
+# ───────────────────────────────────────────────
+# Define Output Directory Structure
+# ───────────────────────────────────────────────
+
+PREFIX = config["prefix"]
+
+# Transdecoder outputs
+TRANSDECODER_OUT_DIR = "02_ORF_prediction/transdecoder"
+TRANSDECODER_LOG_DIR = f"logs/{TRANSDECODER_OUT_DIR}"
+
+# GMST outputs
+GMST_OUT_DIR = "02_ORF_prediction/gmst"
+GMST_LOG_DIR = f"logs/{GMST_OUT_DIR}"
+
+# Annotate output folders
+ANNOTATE_DIR = "03_annotate"
+ANNOTATE_SUBDIRS = {
+    "annot":    f"{ANNOTATE_DIR}/01_annotation",
+    "reclocus": f"{ANNOTATE_DIR}/02_reclocus",
+    "cds":      f"{ANNOTATE_DIR}/03_cds_integration",
+    "asef":     f"{ANNOTATE_DIR}/04_asef",
+    "final":    f"{ANNOTATE_DIR}/05_final"
+}
 
 
 # ───────────────────────────────────────────────
@@ -56,47 +72,39 @@ include: "rules/02_ORF_prediction_transdecoder.smk"
 include: "rules/02_ORF_prediction_gmst.smk"
 include: "rules/03_annotate.smk"
 
-#include: "rules/04_nmd_poison_exons.smk"
-#include: "rules/05_interpro.smk"
-#include: "rules/06_pfam.smk"
-#include: "rules/07_genomic_element_overlaps.smk"
-#include: "rules/08_tracks.smk"
-#include: "rules/09_splicechains.smk"
-#include: "rules/10_DEG.smk"
-#include: "rules/11_collapsed-ORFs.smk"
-#include: "rules/12_isoformswitchanalyzer_inputs.smk"
-#include: "rules/13_pogo.smk"
-#include: "rules/14_squanti3.smk"
 
 rule all:
-    input: 
-        expand("01_isoform_counts/{prefix}_isoform-counts.txt",                        prefix=config["prefix"]),
-        expand("02_ORF_prediction/cpat_prob/{prefix}_corrected.cpatv3p18.ORF_seqs.fa", prefix=config["prefix"]),
-        expand("02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.ORF_seqs.fa", prefix=config["prefix"]),
-        expand("02_ORF_prediction/transdecoder/merged/{prefix}.transdecoder.pep",      prefix=config["prefix"]),
-        expand("02_ORF_prediction/transdecoder/merged/{prefix}.transdecoder.cds",      prefix=config["prefix"]),
-        expand("02_ORF_prediction/transdecoder/merged/{prefix}.transdecoder.gff3",     prefix=config["prefix"]),
-        expand("02_ORF_prediction/transdecoder/merged/{prefix}.transdecoder.bed",      prefix=config["prefix"]),
-        expand("02_ORF_prediction/gmst/merged/{prefix}.gmst.faa",                      prefix=config["prefix"]),
-        expand("02_ORF_prediction/gmst/merged/{prefix}.gmst.fnn",                      prefix=config["prefix"]),
-        expand("02_ORF_prediction/gmst/merged/{prefix}.gmst.gff3",                     prefix=config["prefix"]),
+    input:
+        # --- Step 01: Isoform Counts ---
+        f"01_isoform_counts/{PREFIX}_isoform-counts.txt",
 
+        # --- Step 02: ORF Prediction ---
+        # CPAT outputs
+        f"02_ORF_prediction/cpat_prob/{PREFIX}_corrected.cpatv3p18.ORF_seqs.fa",
+        f"02_ORF_prediction/cpat_leng/{PREFIX}_corrected.cpatv3l18.ORF_seqs.fa",
+        # TransDecoder outputs
+        f"{TRANSDECODER_OUT_DIR}/merged/{PREFIX}.transdecoder.pep",
+        f"{TRANSDECODER_OUT_DIR}/merged/{PREFIX}.transdecoder.cds",
+        f"{TRANSDECODER_OUT_DIR}/merged/{PREFIX}.transdecoder.gff3",
+        f"{TRANSDECODER_OUT_DIR}/merged/{PREFIX}.transdecoder.bed",
+        # GMST outputs
+        f"{GMST_OUT_DIR}/merged/{PREFIX}.gmst.faa",
+        f"{GMST_OUT_DIR}/merged/{PREFIX}.gmst.fnn",
+        f"{GMST_OUT_DIR}/merged/{PREFIX}.gmst.gff3",
+
+        # --- Step 03: Annotation & Analysis ---
+#        f"{ANNOTATE_SUBDIRS['final']}/{PREFIX}_reference_reclocus_refined.txt",
+#        f"{ANNOTATE_SUBDIRS['final']}/{PREFIX}_reference_reclocus_CDS_aa.fa",
+#        f"{ANNOTATE_SUBDIRS['asef']}/{PREFIX}_reference_reclocus_CDS_NE_cds.txt"
 
 
       # expand("03_cpatv3/{prefix}_corrected.cpatv3p18.ORF_prob.tsv", prefix=config["prefix"]),
       # expand("04_transdecoder/{prefix}_transdecoder.check", prefix=config["prefix"]),
       # expand("05_interpro/{prefix}_jobs-submitted.check", prefix=config["prefix"]),
       # expand("06_pfam/{prefix}_jobs-submitted.check", prefix=config["prefix"]),
-
-      # expand("07_annotate/{prefix}_reference.gtf", prefix=config["prefix"]),
-      # expand("07_annotate/{prefix}_reference_transcript.txt", prefix=config["prefix"]),
-      # expand("07_annotate/{prefix}_reference_gene.txt", prefix=config["prefix"]),
       # expand("08_nmd_poison_exons/{prefix}_reference_reclocus_CDS_nmd_sj.txt", prefix=config["prefix"]),
-
       # expand("09_genomic_element_overlaps/{prefix}_genomic_element_overlaps.txt", prefix=config["prefix"]),
       # expand("09_genomic_element_overlaps/{prefix}_SV_overlaps.txt", prefix=config["prefix"]),
-
-
       # expand("10_tracks/{prefix}_reference_reclocus_CDS_extra.gtf", prefix=config["prefix"]),
       # expand("11_splicechains/{prefix}_patched_splicechains.txt", prefix=config["prefix"]),
       # expand("12_DEG/{prefix}_limma.checkpoint", prefix=config["prefix"]),
