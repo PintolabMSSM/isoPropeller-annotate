@@ -4,5 +4,5 @@ channels:
  - bioconda
  - hvbakel
 dependencies:
- - omics-pipelines
- - isopropeller
+ - omics-toolkit>=1.1
+ - isopropeller>=1.8.5
