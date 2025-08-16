@@ -1,0 +1,12 @@
+name: pfamscan
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - hmmer >=3.3
+  - perl
+  - coreutils
+  - gzip
+  - pigz
+  - pfam_scan
