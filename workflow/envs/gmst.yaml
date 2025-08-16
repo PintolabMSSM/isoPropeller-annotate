@@ -5,6 +5,7 @@ channels:
   - defaults
 dependencies:
   - perl>=5.32
+  - biopython >=1.79
   - coreutils
   - gzip
   - pigz
