@@ -81,18 +81,18 @@ rule isop_tabulate_reference:
 rule isop_calculate_fusion_ratios:
     message: "Calculating fusion gene ratios for locus reconstruction"
     input:
-        ref_gtf          = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference.gtf",
-        ref_trns_txt     = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference_transcript.txt",
-        ref_im_trns_txt  = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference_im_transcript.txt",
+        ref_gtf         = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference.gtf",
+        ref_trns_txt    = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference_transcript.txt",
+        ref_im_trns_txt = f"{ANNOTATE_SUBDIRS['annot']}/{{prefix}}_reference_im_transcript.txt",
         iso_count_matrix = "01_isoform_counts/{prefix}_isoform-counts.txt"
     output:
         fusion_ratio = f"{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_fusion_gene_ratio.txt",
         fusion_mono  = f"{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_fusion_monoexonic_gene_id.txt",
     params:
         prefix = f"{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}", # Note: script uses this as a prefix for other outputs
-    conda: 
+    conda:
         SNAKEDIR + "envs/isopropeller.yaml"
-    log: 
+    log:
         f"logs/{ANNOTATE_SUBDIRS['reclocus']}/{{prefix}}_isop-fusion-ratio.log"
     shell:
         r'''
@@ -101,18 +101,18 @@ rule isop_calculate_fusion_ratios:
             echo "## Preparing inputs for locus reconstruction ##"
             WORK_DIR=$(mktemp -d)
 
-            sed 's/#TranscriptID/transcript_id/' "{input.iso_count_matrix}" > "${WORK_DIR}/count.txt"
-            merge2tables.pl -t1 "{input.ref_trns_txt}" -c1 0 -t2 "${WORK_DIR}/count.txt" -c2 0 -o "${WORK_DIR}/merged.txt" -s
-            head -1 "${WORK_DIR}/count.txt" | sed 's/\t/\n/g' | tail -n+2 > "${WORK_DIR}/sample.txt"
+            sed 's/#TranscriptID/transcript_id/' "{input.iso_count_matrix}" > "$WORK_DIR/count.txt"
+            merge2tables.pl -t1 "{input.ref_trns_txt}" -c1 0 -t2 "$WORK_DIR/count.txt" -c2 0 -o "$WORK_DIR/merged.txt" -s
+            head -1 "$WORK_DIR/count.txt" | sed 's/\t/\n/g' | tail -n+2 > "$WORK_DIR/sample.txt"
             
-            fusion_gene_exp_ratio.pl "{input.ref_gtf}" "${WORK_DIR}/merged.txt" "${WORK_DIR}/sample.txt" "{params.prefix}"
+            fusion_gene_exp_ratio.pl "{input.ref_gtf}" "$WORK_DIR/merged.txt" "$WORK_DIR/sample.txt" "{params.prefix}"
             fusion_gene_monoexonic_finder.pl "{input.ref_im_trns_txt}" "{output.fusion_mono}"
             
-            echo "gene_id"$'\t'"monoexonic" > "${WORK_DIR}/id.txt"
-            cat "{output.fusion_mono}" | sed 's/$/\t1/' >> "${WORK_DIR}/id.txt"
+            echo "gene_id"$'\t'"monoexonic" > "$WORK_DIR/id.txt"
+            cat "{output.fusion_mono}" | sed 's/$/\t1/' >> "$WORK_DIR/id.txt"
             
-            merge2tables.pl -t1 "{params.prefix}_fusion_gene_ratio.txt" -c1 0 -t2 "${WORK_DIR}/id.txt" -c2 0 -o "${WORK_DIR}/merged.txt" -s
-            sed 's/\t$/\t0/' "${WORK_DIR}/merged.txt" > "{output.fusion_ratio}"
+            merge2tables.pl -t1 "{params.prefix}_fusion_gene_ratio.txt" -c1 0 -t2 "$WORK_DIR/id.txt" -c2 0 -o "$WORK_DIR/merged.txt" -s
+            sed 's/\t$/\t0/' "$WORK_DIR/merged.txt" > "{output.fusion_ratio}"
 
             rm -r "$WORK_DIR"
         ) &> "{log}"
@@ -232,9 +232,9 @@ rule isop_integrate_orf_predictions:
             echo "## Converting ORF predictions to GTF format ##"
 
             WORK_DIR=$(mktemp -d)
-            fasta-reflow.pl "{input.gmst_fnn}" > "${WORK_DIR}/gmst.fnn"
+            fasta-reflow.pl "{input.gmst_fnn}" > "$WORK_DIR/gmst.fnn"
             
-            GMST2gtf.pl -g "{input.reclocus_gtf}" -r "${WORK_DIR}/gmst.fnn" -f "{input.isop_fasta}" \
+            GMST2gtf.pl -g "{input.reclocus_gtf}" -r "$WORK_DIR/gmst.fnn" -f "{input.isop_fasta}" \
                 -o "{params.gmst_prefix}" -n "{params.nmdj_distance}" -e "{params.tis_efficiency}"
 
             CPAT2gtf.pl -g "{input.reclocus_gtf}" -f "{input.isop_fasta}" -p "{input.cpat_leng}" \
@@ -278,11 +278,11 @@ rule isop_select_best_cds:
             printf '%s\t%s\n' \
                 "{params.gmst_prefix}" "GMST" \
                 "{params.cpat_prefix}" "CPAT" \
-                "{params.transdecoder_prefix}" "Transdecoder" > "${WORK_DIR}/prediction_list.txt"
+                "{params.transdecoder_prefix}" "Transdecoder" > "$WORK_DIR/prediction_list.txt"
             
-            select_CDS_prediction.pl -i "${WORK_DIR}/prediction_list.txt" -o "${WORK_DIR}/temp_cds.gtf" -p "{params.min_prob_cpat3}"
+            select_CDS_prediction.pl -i "$WORK_DIR/prediction_list.txt" -o "$WORK_DIR/temp_cds.gtf" -p "{params.min_prob_cpat3}"
             
-            cat "{input.reclocus_gtf}" "${WORK_DIR}/temp_cds.gtf" | sort -k1,1 -k4,4n > "{output.reclocus_cds_gtf}"
+            cat "{input.reclocus_gtf}" "$WORK_DIR/temp_cds.gtf" | sort -k1,1 -k4,4n > "{output.reclocus_cds_gtf}"
 
             rm -r "$WORK_DIR"
         ) &> "{log}"
@@ -431,9 +431,9 @@ rule isop_convert_classifications:
             WORK_DIR=$(mktemp -d)
 
             merge2tables.pl -t1 "{input.reclocus_cds_trns_txt}" -c1 0 \
-                -t2 "{input.asef_ne_trns_txt}" -c2 0 -o "${WORK_DIR}/merged.txt" -s
+                -t2 "{input.asef_ne_trns_txt}" -c2 0 -o "$WORK_DIR/merged.txt" -s
             
-            classification_conversion.pl "${WORK_DIR}/merged.txt" "{output.reclocus_refined}"
+            classification_conversion.pl "$WORK_DIR/merged.txt" "{output.reclocus_refined}"
             
             rm -r "$WORK_DIR"
         ) &> "{log}"
@@ -459,6 +459,7 @@ rule identify_poison_exons:
         f"logs/{ANNOTATE_SUBDIRS['poison_exon']}/{{prefix}}_poison-exons.log"
     shell:
         r'''
+        set -euo pipefail
         (
             echo "## Running NMD splice junction finder and parser ##"
             mkdir -p "{ANNOTATE_SUBDIRS['poison_exon']}"
