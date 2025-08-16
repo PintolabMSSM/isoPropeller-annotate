@@ -92,7 +92,7 @@ rule diamond_blastp:
         f"{TRANSDECODER_OUT_DIR}/{{prefix}}/blastp/chunk_{{chunk_id}}.blastp"
     params:
         uniref90 = config["uniref90"]
-    threads: 4
+    threads: 12
     log:
         f"{TRANSDECODER_LOG_DIR}/{{prefix}}/diamond_blastp/{{chunk_id}}.log"
     conda:
