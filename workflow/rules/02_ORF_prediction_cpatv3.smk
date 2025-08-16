@@ -7,9 +7,9 @@ rule get_isoform_fasta:
         isop_gtf        = "{prefix}.gtf",
         refgenome_fasta = config["refgenome_fasta"],
     output:
-        isop_gff   = "02_ORF_prediction/{prefix}.gff",
-        isop_bed   = "02_ORF_prediction/{prefix}.bed",
-        isop_fasta = "02_ORF_prediction/{prefix}.fasta",
+        isop_gff   = "02_ORF_prediction/{prefix}_ORFpred-input.gff",
+        isop_bed   = "02_ORF_prediction/{prefix}_ORFpred-input.bed",
+        isop_fasta = "02_ORF_prediction/{prefix}_ORFpred-input.fasta",
     threads: 2
     log:
         "logs/02_ORF_prediction/{prefix}_isoform-fasta.log"
@@ -40,7 +40,7 @@ rule get_isoform_fasta:
 rule run_cpat3_prob:
     message: "Run cpat3 with best-hit by probability"
     input:
-        isop_fasta       = "02_ORF_prediction/{prefix}.fasta",
+        isop_fasta       = "02_ORF_prediction/{prefix}_ORFpred-input.fasta",
     output:
         cpat_prob_seqs   = "02_ORF_prediction/cpat_prob/{prefix}_corrected.cpatv3p18.ORF_seqs.fa",
         cpat_prob        = "02_ORF_prediction/cpat_prob/{prefix}_corrected.cpatv3p18.ORF_prob.tsv",
@@ -84,7 +84,7 @@ rule run_cpat3_prob:
 rule run_cpat3_len:
     message: "Run cpat3 with best-hit by length"
     input:
-        isop_fasta       = "02_ORF_prediction/{prefix}.fasta",
+        isop_fasta       = "02_ORF_prediction/{prefix}_ORFpred-input.fasta",
     output:
         cpat_prob_seqs   = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.ORF_seqs.fa",
         cpat_prob        = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.ORF_prob.tsv",

@@ -17,7 +17,7 @@ def get_gmst_chunk_ids(wildcards):
 # ───────────────────────────────────────────────
 checkpoint gmst_split_fasta:
     input:
-        fasta = "02_ORF_prediction/{prefix}.fasta"
+        fasta = "02_ORF_prediction/{prefix}_ORFpred-input.fasta"
     output:
         directory(f"{GMST_OUT_DIR}/{{prefix}}/chunks")
     params:
@@ -31,7 +31,7 @@ checkpoint gmst_split_fasta:
 # ───────────────────────────────────────────────
 # Rule: GMST per chunk (using Snakemake `shadow`)
 # ───────────────────────────────────────────────
-rule gmst_per_chunk:
+ rule gmst_per_chunk:
     input:
         fa = f"{GMST_OUT_DIR}/{{prefix}}/chunks/chunk_{{chunk_id}}.fasta"
     output:
@@ -88,9 +88,6 @@ rule gmst_per_chunk:
 # ───────────────────────────────────────────────
 # Rule: Aggregate merged outputs per prefix
 # ───────────────────────────────────────────────
-ruleorder:
-    gmst_aggregate > get_isoform_fasta
-
 rule gmst_aggregate:
     input:
         pep_chunks = lambda wc: expand(

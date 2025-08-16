@@ -17,7 +17,7 @@ def get_chunk_ids(wildcards):
 # ───────────────────────────────────────────────
 checkpoint split_fasta:
     input:
-        fasta = "02_ORF_prediction/{prefix}.fasta"
+        fasta = "02_ORF_prediction/{prefix}_ORFpred-input.fasta"
     output:
         directory(f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks")
     params:
@@ -120,9 +120,6 @@ rule diamond_blastp:
 # ───────────────────────────────────────────────
 # Rule: Predict per chunk (keeps -O predicted/)
 # ───────────────────────────────────────────────
-ruleorder:
-    transdecoder_predict > get_isoform_fasta
-
 rule transdecoder_predict:
     input:
         fasta     = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks/chunk_{{chunk_id}}.fasta",
@@ -157,9 +154,6 @@ rule transdecoder_predict:
 # ───────────────────────────────────────────────
 # Rule: Aggregate merged outputs
 # ───────────────────────────────────────────────
-ruleorder:
-    aggregate_results > get_isoform_fasta
-
 rule aggregate_results:
     input:
         lambda wc: expand(
