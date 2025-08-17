@@ -22,7 +22,6 @@ OUT_FOLDER=${snakemake_params[output_dir]}
 {
 
    # Set up output folder
-   rm -rf ${OUT_FOLDER}
    mkdir -p ${OUT_FOLDER}
 
    # Strip out decimals from the raw count matrix to conform to expected inputs

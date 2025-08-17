@@ -4,7 +4,7 @@ channels:
  - hvbakel
  - defaults
 dependencies:
- - omics-toolkit>=1.1
+ - omics-toolkit>=1.2
  - bedtools>=2.30.0
  - samtools>=1.16.1
  - gffread

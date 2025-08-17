@@ -83,6 +83,9 @@ include: "rules/04_ORF_protein_domains_interproscan.smk"
 include: "rules/04_ORF_protein_domains_pfamscan.smk"
 include: "rules/05_genomic_element_overlaps.smk"
 include: "rules/06_tracks.smk"
+include: "rules/07_splicechains.smk"
+include: "rules/08_DEG.smk"
+
 
 rule all:
     input:
@@ -120,11 +123,15 @@ rule all:
         # --- Step 06: Overlaps with genomic elements ---
         f"06_tracks/{PREFIX}_reference_reclocus_CDS_extra.gtf",
 
+        # --- Step 07: Get unique splice chains ---
+        f"07_splicechains/{PREFIX}_splicechains.txt",
 
-      # expand("11_splicechains/{prefix}_patched_splicechains.txt", prefix=config["prefix"]),
-      # expand("12_DEG/{prefix}_limma.checkpoint", prefix=config["prefix"]),
-      # expand("13_collapsed-ORFs/{prefix}_reference_reclocus_CDS_aa_clust_header_generic.faa", prefix=config["prefix"]),
-      # expand("14_isoformswitchanalyzer_inputs/{prefix}_exp_isoforms-nt.fasta", prefix=config["prefix"]),
-      # expand("01_sqanti3/{prefix}_classification.txt", prefix=config["prefix"]),
+        # --- Step 08: Basic DEG analysis for brain-expressed genes ---
+        f"08_DEG/{PREFIX}_limma.checkpoint",
 
-      # final_output
+
+        # f"09_collapsed-ORFs/{PREFIX}_reference_reclocus_CDS_aa_clust_header_generic.faa",
+        # f"10_isoformswitchanalyzer_inputs/{PREFIX}_exp_isoforms-nt.fasta",
+        # f"11_PoGo/{PREFIX}_PoGo_mm1_1MM.bed",
+
+
