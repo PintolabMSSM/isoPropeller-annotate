@@ -81,7 +81,6 @@ rule all:
 
         # --- Step 02: ORF Prediction ---
         # CPAT outputs
-        f"02_ORF_prediction/cpat_prob/{PREFIX}_corrected.cpatv3p18.ORF_seqs.fa",
         f"02_ORF_prediction/cpat_leng/{PREFIX}_corrected.cpatv3l18.ORF_seqs.fa",
         # TransDecoder outputs
         f"{TRANSDECODER_OUT_DIR}/merged/{PREFIX}.transdecoder.pep",
