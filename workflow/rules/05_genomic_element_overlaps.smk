@@ -7,7 +7,7 @@ rule run_element_overlaps:
         reclocus_cds_gtf  = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS.gtf",
     output:
         combined_elements = "05_genomic_element_overlaps/{prefix}_genomic_element_overlaps.txt",
-        sv_elements       = "05_genomic_element_overlaps/{prefix}_SV_overlaps.txt"
+        sv_elements       = "05_genomic_element_overlaps/{prefix}_SV_overlaps.txt",
     threads:
         2
     params:
