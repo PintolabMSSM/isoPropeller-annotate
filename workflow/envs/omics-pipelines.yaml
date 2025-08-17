@@ -4,4 +4,4 @@ channels:
  - bioconda
  - hvbakel
 dependencies:
- - omics-pipelines
+ - omics-pipelines >= 1.1
