@@ -2,16 +2,14 @@
 # Local variables / imports
 # ───────────────────────────────────────────────
 
-# Keep wildcards tidy
 wildcard_constraints:
-    prefix = r"[^/]+"
-    chunk_id = r"\d+"
+    prefix = r"[^/]+",
+    chunk_id = r"\d+",
 
 def get_pfamscan_chunk_ids(wildcards):
-    checkpoint_output = checkpoints.pfamscan_split_fasta.get(prefix=wildcards.prefix).output[0]
-    with open(os.path.join(checkpoint_output, "chunk_ids.txt"), "r") as f:
-        return f.read().strip().split("\n")
-
+    chk_out_dir = checkpoints.pfamscan_split_fasta.get(prefix=wildcards.prefix).output[0]
+    with open(os.path.join(chk_out_dir, "chunk_ids.txt"), "r") as f:
+        return [x for x in f.read().strip().split("\n") if x]
 
 # ───────────────────────────────────────────────
 # Checkpoint: Split protein FASTA for parallel pfamscan
@@ -19,13 +17,13 @@ def get_pfamscan_chunk_ids(wildcards):
 checkpoint pfamscan_split_fasta:
     message: "Split protein FASTA into chunks for PfamScan → {wildcards.prefix}"
     input:
-        fasta = "02_ORF_prediction/{prefix}_ORFpred-input.fasta"
+        fasta  = f"{ANNOTATE_SUBDIRS['final']}/{{prefix}}_reference_reclocus_CDS_aa.fa",
     output:
         directory(f"{PFAMSCAN_OUT_DIR}/{{prefix}}/chunks")
     params:
-        seqs_per_chunk = config["seqs_per_chunk_pfam"]
+        seqs_per_chunk = config["seqs_per_chunk"]
     conda:
-        SNAKEDIR + "envs/base-packages.yaml"
+        SNAKEDIR + "envs/pfamscan.yaml"
     script:
         SNAKEDIR + "scripts/split_fasta.py"
 
@@ -40,37 +38,45 @@ rule pfamscan_per_chunk:
     output:
         pfam_tbl = f"{PFAMSCAN_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.pfam.txt"
     params:
-        pfam_db       = config["pfam_db"],                         # dir with Pfam-A.hmm (+ .h3* files)
+        pfam_db       = config["pfam_db"],
         pfam_scan_exe = config.get("pfam_scan_exe", "pfam_scan.pl"),
-        use_cut_ga    = config.get("pfam_mode", "cut_ga") == "cut_ga",
-        e_dom         = config.get("pfam_e_dom", "1e-5"),
-        e_seq         = config.get("pfam_e_seq", "1e-5"),
-        extra_flags   = config.get("pfam_extra_flags", "-acc -clan_overlap"),
+        pfam_mode     = config.get("pfam_mode", "cut_ga"),
+        e_dom         = str(config.get("pfam_e_dom", "1e-5")),
+        e_seq         = str(config.get("pfam_e_seq", "1e-5")),
+        extra_flags   = config.get("pfam_extra_flags", "-clan_overlap"),
     threads: 8
     log:
         f"{PFAMSCAN_LOG_DIR}/{{prefix}}/pfamscan/{{chunk_id}}.log"
     conda:
-        SNAKEDIR + "envs/pfamscan.yaml"
+        f"{SNAKEDIR}/envs/pfamscan.yaml"
     shadow: "shallow"
     shell:
         r'''
         set -euo pipefail
+        mkdir -p "$(dirname "{log}")"
         (
             echo "## PfamScan chunk {wildcards.chunk_id} ({wildcards.prefix})"
             echo "Input FASTA: {input.faa}"
             echo "Pfam DB dir: {params.pfam_db}"
             mkdir -p "$(dirname "{output.pfam_tbl}")"
 
-            # Preflight: ensure DB is hmmpress'd (h3* files present)
-            if [ ! -f "{params.pfam_db}/Pfam-A.hmm.h3f" ]; then
-              echo "ERROR: Pfam DB not hmmpress'd in {params.pfam_db} (missing .h3* files)" >&2
+            # Preflight: ensure DB files exist and are hmmpress'd
+            if [ ! -f "{params.pfam_db}/Pfam-A.hmm" ]; then
+              echo "ERROR: Missing {params.pfam_db}/Pfam-A.hmm" >&2
               exit 2
             fi
+            for suf in h3f h3i h3m h3p; do
+              if [ ! -f "{params.pfam_db}/Pfam-A.hmm.$suf" ]; then
+                echo "ERROR: Pfam DB not hmmpress'd in {params.pfam_db} (missing Pfam-A.hmm.$suf)" >&2
+                exit 2
+              fi
+            done
 
-            if {params.use_cut_ga}; then
-              mode_flags="-cut_ga"
-            else
+            # Mode flags: GA thresholds are default in pfam_scan.pl (no flags).
+            if [[ "{params.pfam_mode}" == "evalue" ]]; then
               mode_flags="-e_dom {params.e_dom} -e_seq {params.e_seq}"
+            else
+              mode_flags=""
             fi
 
             "{params.pfam_scan_exe}" \
@@ -84,7 +90,6 @@ rule pfamscan_per_chunk:
             test -s "{output.pfam_tbl}"
         ) &> "{log}"
         '''
-
 
 # ───────────────────────────────────────────────
 # Rule: Aggregate all pfamscan chunk results
@@ -100,12 +105,13 @@ rule pfamscan_aggregate:
         pfam_tbl = f"{PFAMSCAN_OUT_DIR}/merged/{{prefix}}.pfam.txt"
     log:
         f"{PFAMSCAN_LOG_DIR}/aggregate/{{prefix}}.log"
+    conda:
+        SNAKEDIR + "envs/pfamscan.yaml"
     shell:
         r'''
         set -euo pipefail
         (
           echo "## Aggregating PfamScan for {wildcards.prefix}"
-          mkdir -p "$(dirname "{output.pfam_tbl}")"
 
           first="{input.pfam_chunks[0]}"
           if grep -q '^#' "$first"; then

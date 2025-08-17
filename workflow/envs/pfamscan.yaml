@@ -1,7 +1,7 @@
 name: pfamscan
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
   - defaults
 dependencies:
   - hmmer >=3.3
@@ -10,3 +10,4 @@ dependencies:
   - gzip
   - pigz
   - pfam_scan
+  - biopython >=1.79

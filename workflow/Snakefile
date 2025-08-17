@@ -63,7 +63,7 @@ ANNOTATE_SUBDIRS = {
 }
 
 # PFAM output folders
-PFAMSCAN_OUT_DIR = "04_pfam"
+PFAMSCAN_OUT_DIR = "05_pfam"
 PFAMSCAN_LOG_DIR = f"logs/{PFAMSCAN_OUT_DIR}"
 
 # ───────────────────────────────────────────────
@@ -75,6 +75,7 @@ include: "rules/02_ORF_prediction_cpatv3.smk"
 include: "rules/02_ORF_prediction_transdecoder.smk"
 include: "rules/02_ORF_prediction_gmst.smk"
 include: "rules/03_annotate.smk"
+include: "rules/05_pfam.smk"
 
 
 rule all:
@@ -100,6 +101,9 @@ rule all:
         f"{ANNOTATE_SUBDIRS['final']}/{PREFIX}_reference_reclocus_CDS_aa.fa",
         f"{ANNOTATE_SUBDIRS['asef']}/{PREFIX}_reference_reclocus_CDS_NE_cds.txt",
         f"{ANNOTATE_SUBDIRS['poison_exon']}/{PREFIX}_nmd_sj_parsed.txt",
+
+        # --- Pfam (merged) ---
+        f"{PFAMSCAN_OUT_DIR}/merged/{PREFIX}.pfam.txt",
 
       # expand("08_nmd_poison_exons/{prefix}_reference_reclocus_CDS_nmd_sj.txt", prefix=config["prefix"]),
       # expand("05_interpro/{prefix}_jobs-submitted.check", prefix=config["prefix"]),
