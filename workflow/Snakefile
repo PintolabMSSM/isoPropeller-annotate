@@ -139,4 +139,4 @@ rule all:
         f"10_isoformswitchanalyzer_inputs/{PREFIX}_exp_isoforms-nt.fasta",
 
         # --- Step 11: Run PoGo analysis to detect mass-spec peptides from a reference file ---
-        f"11_PoGo/{PREFIX}_PoGo_mm1_1MM.bed",
+        f"11_pogo/{PREFIX}_PoGo_mm1_1MM.bed",
