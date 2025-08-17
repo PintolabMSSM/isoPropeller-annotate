@@ -1,8 +1,6 @@
 # ───────────────────────────────────────────────
 # Local variables / imports
 # ───────────────────────────────────────────────
-PFAMSCAN_OUT_DIR = "04_pfam"
-PFAMSCAN_LOG_DIR = f"logs/{PFAMSCAN_OUT_DIR}"
 
 # Keep wildcards tidy
 wildcard_constraints:

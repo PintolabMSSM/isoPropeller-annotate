@@ -28,3 +28,7 @@ set-resources:
   isop_tabulate_reclocus:
     mem_mb:     90000
     runtime:    360
+
+  isop_tabulate_final_cds:
+    mem_mb:     90000
+    runtime:    360

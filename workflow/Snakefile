@@ -54,14 +54,17 @@ GMST_LOG_DIR = f"logs/{GMST_OUT_DIR}"
 # Annotate output folders
 ANNOTATE_DIR = "03_annotate"
 ANNOTATE_SUBDIRS = {
-    "annot":       f"{ANNOTATE_DIR}/A_annotation",
-    "reclocus":    f"{ANNOTATE_DIR}/B_reclocus",
-    "cds":         f"{ANNOTATE_DIR}/C_cds_integration",
-    "asef":        f"{ANNOTATE_DIR}/D_ASEF",
-    "final":       f"{ANNOTATE_DIR}/E_final",
-    "poison_exon": f"{ANNOTATE_DIR}/F_poison_exons"
+    "annot":       f"{ANNOTATE_DIR}/1_annotation",
+    "reclocus":    f"{ANNOTATE_DIR}/2_reclocus",
+    "cds":         f"{ANNOTATE_DIR}/3_cds_integration",
+    "asef":        f"{ANNOTATE_DIR}/4_ASEF",
+    "poison_exon": f"{ANNOTATE_DIR}/5_poison_exons",
+    "final":       f"{ANNOTATE_DIR}/6_final",
 }
 
+# PFAM output folders
+PFAMSCAN_OUT_DIR = "04_pfam"
+PFAMSCAN_LOG_DIR = f"logs/{PFAMSCAN_OUT_DIR}"
 
 # ───────────────────────────────────────────────
 # RULES

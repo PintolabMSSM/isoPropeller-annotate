@@ -462,7 +462,6 @@ rule identify_poison_exons:
         set -euo pipefail
         (
             echo "## Running NMD splice junction finder and parser ##"
-            mkdir -p "{ANNOTATE_SUBDIRS['poison_exon']}"
 
             # Step 1: Find splice junctions that could trigger NMD
             nmd_splice_junction_finder.pl \
