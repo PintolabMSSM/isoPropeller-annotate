@@ -4,10 +4,6 @@
 # ENVIRONMENT #
 ###############
 
-# Set paths from snakemake parameters
-export PATH="${snakemake_params[path]}:$PATH"
-export PERL5LIB="${snakemake_params[perl5lib]}:$PERL5LIB"
-
 # Set aliases
 shopt -s expand_aliases
 alias awkt="awk -F '\t' -v OFS='\t'"
@@ -25,16 +21,13 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
 # Prep folder #
 #-------------#
 {
-
    # Set up output folder
-   rm -rf ${OUT_FOLDER}
    mkdir -p ${OUT_FOLDER}
 
 } 2>&1 | tee -a ${snakemake_log[out]}
 
 
 {
-
    #------------------------------------------#
    # ADD EXTRA ATTRIBUTES TO PATCHED GTF FILE #
    #------------------------------------------#

@@ -4,10 +4,6 @@
 # ENVIRONMENT #
 ###############
 
-# Set paths from snakemake parameters
-export PATH="${snakemake_params[path]}:$PATH"
-export PERL5LIB="${snakemake_params[perl5lib]}:$PERL5LIB"
-
 # Set aliases
 shopt -s expand_aliases
 alias awkt="awk -F '\t' -v OFS='\t'"
@@ -26,16 +22,15 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
 #----------------------------------------------#
 {
    # Set up output folder
-   rm -rf ${OUT_FOLDER}
    mkdir ${OUT_FOLDER}
    
    # Prep data for exon-level overlaps
-   gtf2gff.pl -a transcript_id ${snakemake_input[sq3_gtf]}          > ${FILE_PREFIX}_corrected.tmp-exon.gff
-   gff2bed.pl ${FILE_PREFIX}_corrected.tmp-exon.gff                 > ${FILE_PREFIX}_corrected.tmp-exon.bed
+   gtf2gff.pl -a transcript_id ${snakemake_input[reclocus_cds_gtf]}         > ${FILE_PREFIX}_corrected.tmp-exon.gff
+   gff2bed.pl ${FILE_PREFIX}_corrected.tmp-exon.gff                         > ${FILE_PREFIX}_corrected.tmp-exon.bed
    
    # Prep data for CDS-level overlaps
-   gtf2gff.pl -f CDS -a transcript_id ${snakemake_input[sq3_gtf]}   > ${FILE_PREFIX}_corrected.tmp-CDS.gff
-   gff2bed.pl ${FILE_PREFIX}_corrected.tmp-CDS.gff                  > ${FILE_PREFIX}_corrected.tmp-CDS.bed
+   gtf2gff.pl -f CDS -a transcript_id ${snakemake_input[reclocus_cds_gtf]}  > ${FILE_PREFIX}_corrected.tmp-CDS.gff
+   gff2bed.pl ${FILE_PREFIX}_corrected.tmp-CDS.gff                          > ${FILE_PREFIX}_corrected.tmp-CDS.bed
 
 } 2>&1 | tee -a ${snakemake_log[out]}
 

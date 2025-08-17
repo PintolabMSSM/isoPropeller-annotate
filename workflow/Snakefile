@@ -81,7 +81,8 @@ include: "rules/02_ORF_prediction_gmst.smk"
 include: "rules/03_isoPropeller_annotate.smk"
 include: "rules/04_ORF_protein_domains_interproscan.smk"
 include: "rules/04_ORF_protein_domains_pfamscan.smk"
-
+include: "rules/05_genomic_element_overlaps.smk"
+include: "rules/06_tracks.smk"
 
 rule all:
     input:
@@ -112,10 +113,14 @@ rule all:
         f"{INTERPROSCAN_OUT_DIR}/merged/{PREFIX}.tsv",
         f"{INTERPROSCAN_OUT_DIR}/merged/{PREFIX}.gff3",
 
+        # --- Step 05: Overlaps with genomic elements ---
+        f"05_genomic_element_overlaps/{PREFIX}_genomic_element_overlaps.txt",
+        f"05_genomic_element_overlaps/{PREFIX}_SV_overlaps.txt",
+      
+        # --- Step 06: Overlaps with genomic elements ---
+        f"06_tracks/{PREFIX}_reference_reclocus_CDS_extra.gtf",
 
-      # expand("09_genomic_element_overlaps/{prefix}_genomic_element_overlaps.txt", prefix=config["prefix"]),
-      # expand("09_genomic_element_overlaps/{prefix}_SV_overlaps.txt", prefix=config["prefix"]),
-      # expand("10_tracks/{prefix}_reference_reclocus_CDS_extra.gtf", prefix=config["prefix"]),
+
       # expand("11_splicechains/{prefix}_patched_splicechains.txt", prefix=config["prefix"]),
       # expand("12_DEG/{prefix}_limma.checkpoint", prefix=config["prefix"]),
       # expand("13_collapsed-ORFs/{prefix}_reference_reclocus_CDS_aa_clust_header_generic.faa", prefix=config["prefix"]),

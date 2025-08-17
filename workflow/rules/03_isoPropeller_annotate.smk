@@ -328,13 +328,13 @@ rule isop_tabulate_final_cds:
                 -a "$ATTRIBUTE_LIST" -d "$TAG_LIST" -n "{params.nmdj_distance}" -s \
                 -g "{params.refgenome_fasta}" -j "{params.intron_coverage}" -r -t {threads}
 
-            # Step 1: Generate the AA fasta with terminal stop codons to a temporary file
+            # Step 1: Generate the AA fasta directly into its final destination
             gtf2fasta_CDS.pl -i "{input.reclocus_cds_gtf}" \
-                -o "$WORK_DIR/temp_aa" \
+                -o "{params.final_out_prefix}" \
                 -g "{params.refgenome_fasta}" -t {threads}
             
-            # Step 2: Use sed to remove terminal stop codons (*) and create the final file
-            sed 's/\*$//' "$WORK_DIR/temp_aa.fa" > "{output.reclocus_cds_aa}"
+            # Step 2: Use sed -i to remove terminal stop codons (*) in-place
+            sed -i 's/\*$//' "{output.reclocus_cds_aa}"
             
             rm -r "$WORK_DIR"
         ) &> "{log}"
