@@ -1,6 +1,9 @@
 channels:
  - conda-forge
  - bioconda
+ - hvbakel
+ - defaults
 dependencies:
+ - omics-toolkit>=1.2
  - cd-hit
  - perl

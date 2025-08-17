@@ -85,6 +85,7 @@ include: "rules/05_genomic_element_overlaps.smk"
 include: "rules/06_tracks.smk"
 include: "rules/07_splicechains.smk"
 include: "rules/08_DEG.smk"
+include: "rules/09_collapsed-ORFs.smk"
 
 
 rule all:
@@ -129,8 +130,9 @@ rule all:
         # --- Step 08: Basic DEG analysis for brain-expressed genes ---
         f"08_DEG/{PREFIX}_limma.checkpoint",
 
+        # --- Step 09: Get ORFs in a variety of formats for mass-spec analysis ---
+        f"09_collapsed-ORFs/{PREFIX}_reference_reclocus_CDS_aa_clust_header_generic.faa",
 
-        # f"09_collapsed-ORFs/{PREFIX}_reference_reclocus_CDS_aa_clust_header_generic.faa",
         # f"10_isoformswitchanalyzer_inputs/{PREFIX}_exp_isoforms-nt.fasta",
         # f"11_PoGo/{PREFIX}_PoGo_mm1_1MM.bed",
 
