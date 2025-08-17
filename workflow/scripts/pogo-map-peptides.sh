@@ -4,10 +4,6 @@
 # ENVIRONMENT #
 ###############
 
-# Set paths from snakemake parameters
-export PATH="${snakemake_params[path]}:$PATH"
-export PERL5LIB="${snakemake_params[perl5lib]}:$PERL5LIB"
-
 # Set aliases
 shopt -s expand_aliases
 alias awkt="awk -F '\t' -v OFS='\t'"
@@ -25,11 +21,9 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
 # Run PoGo with a provided peptide map to check for new ORF support #
 #-------------------------------------------------------------------#
 {
-
    # NOTE: PoGo must be built with gcc/4.9.3 or greater to enable proper regexp support.
    
    # Set up output folder
-   rm -rf ${OUT_FOLDER}
    mkdir ${OUT_FOLDER}
    
    # Create a PoGo compatible fasta file

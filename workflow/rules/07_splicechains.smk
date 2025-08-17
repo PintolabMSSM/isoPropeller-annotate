@@ -19,7 +19,7 @@ rule get_unique_splicechains:
         (
             echo "## Get unique splicechains ##"
             
-            bed2splicechains.pl "{isop_bed}" | sort -t : -k1,1 -k2,2n > "{splicechains_out}"
+            bed2splicechains.pl "{input.isop_bed}" | sort -t : -k1,1 -k2,2n > "{output.splicechains_out}"
 
         ) &> "{log}"
         '''

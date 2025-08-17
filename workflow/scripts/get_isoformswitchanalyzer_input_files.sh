@@ -4,10 +4,6 @@
 # ENVIRONMENT #
 ###############
 
-# Set paths from snakemake parameters
-export PATH="${snakemake_params[path]}:$PATH"
-export PERL5LIB="${snakemake_params[perl5lib]}:$PERL5LIB"
-
 # Set aliases
 shopt -s expand_aliases
 alias awkt="awk -F '\t' -v OFS='\t'"
@@ -26,7 +22,6 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
 #--------------------------------------------------------------------------------#
 {
    # Set up output folder
-   rm -rf ${OUT_FOLDER}
    mkdir ${OUT_FOLDER}
    
    # Generate the counts file, the filtered counts file and the matching design and TPM files
@@ -74,7 +69,7 @@ EOF
       >> ${FILE_PREFIX}_exp_cpat2.txt
    
    # Copy pfamscan output (if it exists) : isoforms.pfamscan
-   if [[ -e ${snakemake_params[pfamscan_output]} ]]
+   if [[ -e ${snakemake_input[pfamscan_output]} ]]
    then
       cp ${snakemake_params[pfamscan_output]} ${FILE_PREFIX}_exp_pfam.pfamscan
    fi

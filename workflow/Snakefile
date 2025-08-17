@@ -86,6 +86,8 @@ include: "rules/06_tracks.smk"
 include: "rules/07_splicechains.smk"
 include: "rules/08_DEG.smk"
 include: "rules/09_collapsed-ORFs.smk"
+include: "rules/10_isoformswitchanalyzer_inputs.smk"
+include: "rules/11_pogo.smk"
 
 
 rule all:
@@ -133,7 +135,8 @@ rule all:
         # --- Step 09: Get ORFs in a variety of formats for mass-spec analysis ---
         f"09_collapsed-ORFs/{PREFIX}_reference_reclocus_CDS_aa_clust_header_generic.faa",
 
-        # f"10_isoformswitchanalyzer_inputs/{PREFIX}_exp_isoforms-nt.fasta",
-        # f"11_PoGo/{PREFIX}_PoGo_mm1_1MM.bed",
+        # --- Step 10: Get a set of input files needed for running isoformswitchanalyzer ---
+        f"10_isoformswitchanalyzer_inputs/{PREFIX}_exp_isoforms-nt.fasta",
 
-
+        # --- Step 11: Run PoGo analysis to detect mass-spec peptides from a reference file ---
+        f"11_PoGo/{PREFIX}_PoGo_mm1_1MM.bed",
