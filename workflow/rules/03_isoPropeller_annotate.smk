@@ -311,9 +311,9 @@ rule isop_tabulate_final_cds:
         f"logs/{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_isop-tabulate-final.log"
     shell:
         r'''
+        set -euo pipefail
         (
             echo "## Running final tabulation and generating AA sequences ##"
-            mkdir -p "{ANNOTATE_SUBDIRS['final']}"
             WORK_DIR=$(mktemp -d)
 
             ATTRIBUTE_LIST="$WORK_DIR/attributes.txt"

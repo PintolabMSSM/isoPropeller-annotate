@@ -27,6 +27,11 @@ min_prob_cpat3:           0.9
 # Set minimum reads per sample to be included in the IsoformSwitchAnalyzeR filtered file set
 isoswitch_min_count:      5000
 
+# Interproscan configuration settings
+interproscan_path:        "/sc/arion/projects/bakellab/reference-databases/interproscan/interproscan-5.68-100.0/interproscan.sh"
+interproscan_apps:        "Pfam,PANTHER,SMART"
+interproscan_extra_flags: "-t p -ms 100 --goterms --pathways"
+
 # Paths to required reference directories and files
 refgenome_dir:            /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC
 refgenome_fasta:          /sc/arion/projects/pintod02c/reference-databases/hg38-v41-ERCC/GRCh38.primary_assembly.genome.fa

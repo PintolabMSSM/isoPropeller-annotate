@@ -62,9 +62,13 @@ ANNOTATE_SUBDIRS = {
     "final":       f"{ANNOTATE_DIR}/6_final",
 }
 
-# PFAM output folders
-PFAMSCAN_OUT_DIR = "05_pfam"
+# Pfamscan output folders
+PFAMSCAN_OUT_DIR = "04_ORF_protein_domains/pfamscan"
 PFAMSCAN_LOG_DIR = f"logs/{PFAMSCAN_OUT_DIR}"
+
+# Interproscan output folders
+INTERPROSCAN_OUT_DIR = "04_ORF_protein_domains/interproscan"
+INTERPROSCAN_LOG_DIR = f"logs/{INTERPROSCAN_OUT_DIR}"
 
 # ───────────────────────────────────────────────
 # RULES
@@ -74,8 +78,9 @@ include: "rules/01_isoform-counts.smk"
 include: "rules/02_ORF_prediction_cpatv3.smk"
 include: "rules/02_ORF_prediction_transdecoder.smk"
 include: "rules/02_ORF_prediction_gmst.smk"
-include: "rules/03_annotate.smk"
-include: "rules/05_pfam.smk"
+include: "rules/03_isoPropeller_annotate.smk"
+include: "rules/04_ORF_protein_domains_interproscan.smk"
+include: "rules/04_ORF_protein_domains_pfamscan.smk"
 
 
 rule all:
@@ -102,12 +107,11 @@ rule all:
         f"{ANNOTATE_SUBDIRS['asef']}/{PREFIX}_reference_reclocus_CDS_NE_cds.txt",
         f"{ANNOTATE_SUBDIRS['poison_exon']}/{PREFIX}_nmd_sj_parsed.txt",
 
-        # --- Pfam (merged) ---
+        # --- Step 04: ORF protein domain analysis ---
         f"{PFAMSCAN_OUT_DIR}/merged/{PREFIX}.pfam.txt",
+        f"{INTERPROSCAN_OUT_DIR}/merged/{PREFIX}.tsv",
+        f"{INTERPROSCAN_OUT_DIR}/merged/{PREFIX}.gff3",
 
-      # expand("08_nmd_poison_exons/{prefix}_reference_reclocus_CDS_nmd_sj.txt", prefix=config["prefix"]),
-      # expand("05_interpro/{prefix}_jobs-submitted.check", prefix=config["prefix"]),
-      # expand("06_pfam/{prefix}_jobs-submitted.check", prefix=config["prefix"]),
 
       # expand("09_genomic_element_overlaps/{prefix}_genomic_element_overlaps.txt", prefix=config["prefix"]),
       # expand("09_genomic_element_overlaps/{prefix}_SV_overlaps.txt", prefix=config["prefix"]),

@@ -1,0 +1,12 @@
+name: interproscan
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - biopython >=1.79
+  - openjdk=11
+  - interproscan
+  - coreutils
+  - gzip
+  - pigz
