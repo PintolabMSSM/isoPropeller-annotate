@@ -299,6 +299,8 @@ rule isop_tabulate_final_cds:
         reclocus_cds_trns_txt = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS_transcript.txt",
         reclocus_cds_gene_txt = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS_gene.txt",
         reclocus_cds_aa       = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS_aa.fa",
+        reclocus_cds_nt       = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS_cds.fa",
+        reclocus_cds_log      = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS.log",
     params:
         refgenome_fasta  = config["refgenome_fasta"],
         intron_coverage  = config["intron_coverage"],
