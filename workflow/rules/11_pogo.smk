@@ -5,7 +5,7 @@ rule run_pogo:
     message: "Map a custom mass-spec peptide input file using PoGo."
     input:
         gtf_stopfix      = "06_tracks/{prefix}_patched_extra_stopfix.gtf",
-        reclocus_cds_aa  = f"{ANNOTATE_SUBDIRS['final']}/{{prefix}}_reference_reclocus_CDS_aa.fa",
+        reclocus_cds_aa  = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS_aa.fa",
     output:
         exp_counts       = "11_pogo/{prefix}_PoGo_mm1_1MM.bed"
     threads:

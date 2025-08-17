@@ -298,12 +298,12 @@ rule isop_tabulate_final_cds:
     output:
         reclocus_cds_trns_txt = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS_transcript.txt",
         reclocus_cds_gene_txt = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS_gene.txt",
-        reclocus_cds_aa       = f"{ANNOTATE_SUBDIRS['final']}/{{prefix}}_reference_reclocus_CDS_aa.fa",
+        reclocus_cds_aa       = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS_aa.fa",
     params:
-        refgenome_fasta = config["refgenome_fasta"],
-        intron_coverage = config["intron_coverage"],
-        nmdj_distance   = config["nmdj_distance"],
-        out_prefix      = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS",
+        refgenome_fasta  = config["refgenome_fasta"],
+        intron_coverage  = config["intron_coverage"],
+        nmdj_distance    = config["nmdj_distance"],
+        out_prefix       = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS",
     threads: 12
     conda:
         SNAKEDIR + "envs/isopropeller.yaml"
@@ -330,7 +330,7 @@ rule isop_tabulate_final_cds:
 
             # Step 1: Generate the AA fasta directly into its final destination
             gtf2fasta_CDS.pl -i "{input.reclocus_cds_gtf}" \
-                -o "{params.final_out_prefix}" \
+                -o "{params.out_prefix}" \
                 -g "{params.refgenome_fasta}" -t {threads}
             
             # Step 2: Use sed -i to remove terminal stop codons (*) in-place

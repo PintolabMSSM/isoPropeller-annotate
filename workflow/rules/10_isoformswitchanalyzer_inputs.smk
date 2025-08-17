@@ -8,7 +8,7 @@ rule get_isoformswitchanalyzer_input_files:
         gtf_stopfix         = "06_tracks/{prefix}_patched_extra_stopfix.gtf",
         trackgroups         = "{prefix}.trackgroups",
         cpat_prob_best      = "02_ORF_prediction/cpat_leng/{prefix}_corrected.cpatv3l18.ORF_prob.best.tsv",
-        reclocus_cds_aa     = f"{ANNOTATE_SUBDIRS['final']}/{{prefix}}_reference_reclocus_CDS_aa.fa",
+        reclocus_cds_aa     = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS_aa.fa",
         pfamscan_output     = f"{PFAMSCAN_OUT_DIR}/merged/{{prefix}}.pfam.txt"
     output:
         exp_counts          = "10_isoformswitchanalyzer_inputs/{prefix}_exp_counts.txt",

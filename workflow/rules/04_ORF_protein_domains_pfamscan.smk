@@ -17,7 +17,7 @@ def get_pfamscan_chunk_ids(wildcards):
 checkpoint pfamscan_split_fasta:
     message: "Split protein FASTA into chunks for PfamScan → {wildcards.prefix}"
     input:
-        fasta  = f"{ANNOTATE_SUBDIRS['final']}/{{prefix}}_reference_reclocus_CDS_aa.fa",
+        fasta  = f"{ANNOTATE_SUBDIRS['cds']}/{{prefix}}_reference_reclocus_CDS_aa.fa",
     output:
         directory(f"{PFAMSCAN_OUT_DIR}/{{prefix}}/chunks")
     params:

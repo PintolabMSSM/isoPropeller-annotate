@@ -110,7 +110,7 @@ rule all:
 
         # --- Step 03: Annotation & Analysis ---
         f"{ANNOTATE_SUBDIRS['final']}/{PREFIX}_reference_reclocus_refined.txt",
-        f"{ANNOTATE_SUBDIRS['final']}/{PREFIX}_reference_reclocus_CDS_aa.fa",
+        f"{ANNOTATE_SUBDIRS['cds']}/{PREFIX}_reference_reclocus_CDS_aa.fa",
         f"{ANNOTATE_SUBDIRS['asef']}/{PREFIX}_reference_reclocus_CDS_NE_cds.txt",
         f"{ANNOTATE_SUBDIRS['poison_exon']}/{PREFIX}_nmd_sj_parsed.txt",
 
