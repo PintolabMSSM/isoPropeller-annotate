@@ -41,6 +41,7 @@ def as_bool(val):
 # Define Output Directory Structure
 # ───────────────────────────────────────────────
 
+# Define a local variable for prefix
 PREFIX = config["prefix"]
 
 # Transdecoder outputs
@@ -58,8 +59,8 @@ ANNOTATE_SUBDIRS = {
     "reclocus":    f"{ANNOTATE_DIR}/2_reclocus",
     "cds":         f"{ANNOTATE_DIR}/3_cds_integration",
     "asef":        f"{ANNOTATE_DIR}/4_ASEF",
-    "poison_exon": f"{ANNOTATE_DIR}/5_poison_exons",
-    "final":       f"{ANNOTATE_DIR}/6_final",
+    "final":       f"{ANNOTATE_DIR}/5_refined",
+    "poison_exon": f"{ANNOTATE_DIR}/6_poison_exons",
 }
 
 # Pfamscan output folders
