@@ -108,7 +108,7 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
       trackbase="${FILE_PREFIX}_${track/flcount_/sample_}"
       cut-by-ids -f ${snakemake_input[iso_count_matrix]} TranscriptID $track | awkt '$2>0 && $1 !~ /TranscriptID/ {print $1, $2}' > ${trackbase}.ids
       gtf-filter-attributes.pl -a transcript_id -m ${trackbase}.ids ${snakemake_output[gtf_final]} > ${trackbase}.gtf
-      gtf2gff.pl -a transcript_id,gene_name,gene_biotype,cds_type ${trackbase}.gtf > ${trackbase}.gff
+      gtf2gff.pl -a transcript_id,gene_name,gene_biotype,cds_type -f exon,CDS ${trackbase}.gtf > ${trackbase}.gff
       gff2bed.pl ${trackbase}.gff > ${trackbase}.bed
       awkt '{split($4,a,"|"); print a[1], $0}' ${trackbase}.bed > ${trackbase}.bed.score1
       join-by-ids ${trackbase}.ids ${trackbase}.bed.score1 | awkt '{$7=$2; print $0}' | cut --complement -f1,2 | sortt -k1,1 -k2,2n -k3,3n > ${trackbase}.bed
@@ -127,7 +127,7 @@ FILE_PREFIX="${OUT_FOLDER}/${snakemake_params[prefix]}"
          | awkt '{sum=0; for(i=2;i<=NF;i++){sum+=$i}; print $1, sum }' \
          | awkt '$2>0 && $1 !~ /TranscriptID/ {print $1, $2}' > ${trackbase}.ids
       gtf-filter-attributes.pl -a transcript_id -m ${trackbase}.ids ${snakemake_output[gtf_final]} > ${trackbase}.gtf
-      gtf2gff.pl -a transcript_id,gene_name,gene_biotype,cds_type ${trackbase}.gtf > ${trackbase}.gff
+      gtf2gff.pl -a transcript_id,gene_name,gene_biotype,cds_type -f exon,CDS ${trackbase}.gtf > ${trackbase}.gff
       gff2bed.pl ${trackbase}.gff > ${trackbase}.bed
       awkt '{split($4,a,"|"); print a[1], $0}' ${trackbase}.bed > ${trackbase}.bed.score1
       join-by-ids ${trackbase}.ids ${trackbase}.bed.score1 | awkt '{$7=$2; print $0}' | cut --complement -f1,2 | sortt -k1,1 -k2,2n -k3,3n > ${trackbase}.bed
