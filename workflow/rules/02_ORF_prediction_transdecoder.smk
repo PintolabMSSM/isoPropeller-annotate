@@ -16,7 +16,7 @@ rule transdecoder_longorfs_global:
     input:
         fasta = "02_ORF_prediction/{prefix}_ORFpred-input.fasta"
     output:
-        pep_symlink = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/global_model/longest_orfs.pep",
+        pep_file    = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/global_model/{{prefix}}_ORFpred-input.fasta.transdecoder_dir/longest_orfs.pep",
         model_dir   = directory(f"{TRANSDECODER_OUT_DIR}/{{prefix}}/global_model/{{prefix}}_ORFpred-input.fasta.transdecoder_dir")
     params:
         out_parent_dir = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/global_model",
@@ -38,10 +38,8 @@ rule transdecoder_longorfs_global:
                 -t "{input.fasta}" \
                 --output_dir "{params.out_parent_dir}"
 
-            # Reconstruct the model dir path inside the shell
-            BASENAME=$(basename "{input.fasta}")
-            ln -sf "{params.out_parent_dir}/${{BASENAME}}.transdecoder_dir/longest_orfs.pep" "{output.pep_symlink}"
-
+            # Explicitly check that the output file was created and is not empty
+            test -s "{output.pep_file}"
         ) &> "{log}"
         '''
 
@@ -51,7 +49,7 @@ rule transdecoder_longorfs_global:
 # ───────────────────────────────────────────────
 checkpoint split_fasta:
     input:
-        fasta = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/global_model/longest_orfs.pep"
+        fasta = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/global_model/{{prefix}}_ORFpred-input.fasta.transdecoder_dir/longest_orfs.pep"
     output:
         directory(f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks")
     params:
@@ -201,9 +199,9 @@ rule transdecoder_predict_final:
             mkdir -p "$(dirname "{output.pep}")"
             BASENAME=$(basename "{input.fasta}")
 
-            mv "{params.out_parent_dir}/${BASENAME}.transdecoder.pep"  "{output.pep}"
-            mv "{params.out_parent_dir}/${BASENAME}.transdecoder.cds"  "{output.cds}"
-            mv "{params.out_parent_dir}/${BASENAME}.transdecoder.gff3" "{output.gff3}"
-            mv "{params.out_parent_dir}/${BASENAME}.transdecoder.bed"  "{output.bed}"
+            mv "{params.out_parent_dir}/$BASENAME.transdecoder.pep"  "{output.pep}"
+            mv "{params.out_parent_dir}/$BASENAME.transdecoder.cds"  "{output.cds}"
+            mv "{params.out_parent_dir}/$BASENAME.transdecoder.gff3" "{output.gff3}"
+            mv "{params.out_parent_dir}/$BASENAME.transdecoder.bed"  "{output.bed}"
         ) &> "{log}"
         '''
