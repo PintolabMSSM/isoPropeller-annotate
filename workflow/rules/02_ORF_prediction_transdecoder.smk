@@ -10,56 +10,64 @@ def get_chunk_ids(wildcards):
 
 
 # ───────────────────────────────────────────────
-# Checkpoint: split fasta
+# Rule: Create a single training model on the full dataset
 # ───────────────────────────────────────────────
-checkpoint split_fasta:
+rule transdecoder_longorfs_global:
     input:
         fasta = "02_ORF_prediction/{prefix}_ORFpred-input.fasta"
     output:
-        directory(f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks")
+        pep_symlink = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/global_model/longest_orfs.pep",
+        model_dir   = directory(f"{TRANSDECODER_OUT_DIR}/{{prefix}}/global_model/{{prefix}}_ORFpred-input.fasta.transdecoder_dir")
     params:
-        seqs_per_chunk = config["seqs_per_chunk"]
-    conda:
-        SNAKEDIR + "envs/transdecoder.yaml"
-    script:
-        SNAKEDIR + "scripts/split_fasta.py"
-
-# ───────────────────────────────────────────────
-# Rule: Longest ORFs per chunk (writes under predicted/)
-# ───────────────────────────────────────────────
-rule transdecoder_longorfs:
-    input:
-        f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks/chunk_{{chunk_id}}.fasta"
-    output:
-        f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.fasta.transdecoder_dir/longest_orfs.pep"
-    params:
-        out_parent_dir = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted",
-        minorf = config["minorf_transdecoder"]
-    threads: 2
+        out_parent_dir = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/global_model",
+        minorf         = config["minorf_transdecoder"]
+    threads: 4
     log:
-        f"{TRANSDECODER_LOG_DIR}/{{prefix}}/longorfs/{{chunk_id}}.log"
+        f"{TRANSDECODER_LOG_DIR}/{{prefix}}/longorfs_global.log"
     conda:
         SNAKEDIR + "envs/transdecoder.yaml"
     shell:
         r'''
         set -euo pipefail
         (
-            echo "## TransDecoder.LongOrfs chunk {wildcards.chunk_id} ({wildcards.prefix})"
+            echo "## TransDecoder.LongOrfs on full dataset: {wildcards.prefix}"
+            mkdir -p "{params.out_parent_dir}"
             TransDecoder.LongOrfs \
                 -m {params.minorf} \
                 -S \
-                -t "{input}" \
+                -t "{input.fasta}" \
                 --output_dir "{params.out_parent_dir}"
-            test -s "{output}"
+
+            # Reconstruct the model dir path inside the shell
+            BASENAME=$(basename "{input.fasta}")
+            ln -sf "{params.out_parent_dir}/${{BASENAME}}.transdecoder_dir/longest_orfs.pep" "{output.pep_symlink}"
+
         ) &> "{log}"
         '''
 
+
 # ───────────────────────────────────────────────
-# Rule: Pfam domain search (reads longest_orfs.pep from predicted/)
+# Checkpoint: Split the GLOBAL longest_orfs.pep for parallel search
+# ───────────────────────────────────────────────
+checkpoint split_fasta:
+    input:
+        fasta = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/global_model/longest_orfs.pep"
+    output:
+        directory(f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks")
+    params:
+        seqs_per_chunk=config["seqs_per_chunk"]
+    conda:
+        SNAKEDIR + "envs/transdecoder.yaml"
+    script:
+        SNAKEDIR + "scripts/split_fasta.py"
+
+
+# ───────────────────────────────────────────────
+# Rule: Pfam domain search (runs on peptide chunks)
 # ───────────────────────────────────────────────
 rule hmmscan:
     input:
-        f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.fasta.transdecoder_dir/longest_orfs.pep"
+        f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks/chunk_{{chunk_id}}.fasta"
     output:
         f"{TRANSDECODER_OUT_DIR}/{{prefix}}/hmmscan/chunk_{{chunk_id}}.domtblout"
     params:
@@ -73,21 +81,23 @@ rule hmmscan:
         r'''
         set -euo pipefail
         (
-            echo "## hmmsearch Pfam chunk {wildcards.chunk_id} ({wildcards.prefix})"
-            hmmsearch \
-                -E 1e-10 \
+            echo "## hmmscan Pfam chunk {wildcards.chunk_id} ({wildcards.prefix})"
+            hmmscan \
                 --domtblout "{output}" \
                 --cpu {threads} \
-                "{params.pfam_a_hmm}" "{input}"
+                "{params.pfam_a_hmm}" \
+                "{input}"
+
         ) &> "{log}"
         '''
 
+
 # ───────────────────────────────────────────────
-# Rule: DIAMOND per chunk (reads from predicted/.transdecoder_dir)
+# Rule: DIAMOND per chunk (runs on peptide chunks)
 # ───────────────────────────────────────────────
 rule diamond_blastp:
     input:
-        f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.fasta.transdecoder_dir/longest_orfs.pep"
+        f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks/chunk_{{chunk_id}}.fasta"
     output:
         f"{TRANSDECODER_OUT_DIR}/{{prefix}}/blastp/chunk_{{chunk_id}}.blastp"
     params:
@@ -111,68 +121,89 @@ rule diamond_blastp:
                 --evalue 1e-5 \
                 --threads {threads} \
                 --out "{output}"
+
         ) &> "{log}"
         '''
 
+
 # ───────────────────────────────────────────────
-# Rule: Predict per chunk (keeps -O predicted/)
+# Rule: Merge parallel homology search results
 # ───────────────────────────────────────────────
-rule transdecoder_predict:
+rule merge_homology_results:
     input:
-        fasta     = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/chunks/chunk_{{chunk_id}}.fasta",
-        domtblout = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/hmmscan/chunk_{{chunk_id}}.domtblout",
-        blastp    = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/blastp/chunk_{{chunk_id}}.blastp"
+        blastp = lambda wc: expand(f"{TRANSDECODER_OUT_DIR}/{{prefix}}/blastp/chunk_{{chunk_id}}.blastp",
+                                   prefix=wc.prefix, chunk_id=get_chunk_ids(wc)),
+        pfam   = lambda wc: expand(f"{TRANSDECODER_OUT_DIR}/{{prefix}}/hmmscan/chunk_{{chunk_id}}.domtblout",
+                                   prefix=wc.prefix, chunk_id=get_chunk_ids(wc))
     output:
-        pep  = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.fasta.transdecoder.pep",
-        cds  = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.fasta.transdecoder.cds",
-        gff3 = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.fasta.transdecoder.gff3",
-        bed  = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.fasta.transdecoder.bed"
-    params:
-        out_parent_dir = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted"
-    threads: 1
+        blastp = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/merged_homology.blastp",
+        pfam   = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/merged_homology.pfam.domtblout"
     log:
-        f"{TRANSDECODER_LOG_DIR}/{{prefix}}/predict/{{chunk_id}}.log"
+        f"{TRANSDECODER_LOG_DIR}/{{prefix}}/merge_homology.log"
+    shell:
+        r'''
+        set -euo pipefail
+        (
+            echo "## Merging homology evidence for {wildcards.prefix}"
+            
+            # Scalable merge for BLASTp results
+            printf '%s\0' {input.blastp} | xargs -0 cat -- > "{output.blastp}"
+
+            # Safely and scalably merge HMMER results
+            : > "{output.pfam}"
+            for f in {input.pfam}; do
+                if grep -q "^#" "$f"; then
+                    grep "^#" "$f" > "{output.pfam}"
+                    break
+                fi
+            done
+            
+            # Scalably append all non-header lines from all chunk files
+            printf '%s\0' {input.pfam} | xargs -0 grep -h -v "^#" -- >> "{output.pfam}" || true
+
+        ) &> "{log}"
+        '''
+
+
+# ───────────────────────────────────────────────
+# Rule: Predict once on the full dataset
+# ───────────────────────────────────────────────
+rule transdecoder_predict_final:
+    input:
+        fasta     = "02_ORF_prediction/{prefix}_ORFpred-input.fasta",
+        blastp    = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/merged_homology.blastp",
+        pfam      = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/merged_homology.pfam.domtblout",
+        model_dir = directory(f"{TRANSDECODER_OUT_DIR}/{{prefix}}/global_model/{{prefix}}_ORFpred-input.fasta.transdecoder_dir")
+    output:
+        pep   = f"{TRANSDECODER_OUT_DIR}/merged/{{prefix}}.transdecoder.pep",
+        cds   = f"{TRANSDECODER_OUT_DIR}/merged/{{prefix}}.transdecoder.cds",
+        gff3  = f"{TRANSDECODER_OUT_DIR}/merged/{{prefix}}.transdecoder.gff3",
+        bed   = f"{TRANSDECODER_OUT_DIR}/merged/{{prefix}}.transdecoder.bed"
+    params:
+        out_parent_dir = f"{TRANSDECODER_OUT_DIR}/{{prefix}}/global_model"
+    threads: 4
+    log:
+        f"{TRANSDECODER_LOG_DIR}/{{prefix}}/predict_final.log"
     conda:
         SNAKEDIR + "envs/transdecoder.yaml"
     shell:
         r'''
         set -euo pipefail
         (
-            echo "## TransDecoder.Predict chunk {wildcards.chunk_id} ({wildcards.prefix})"
+            echo "## TransDecoder.Predict on full dataset {wildcards.prefix}"
             TransDecoder.Predict \
                 -t "{input.fasta}" \
-                --retain_pfam_hits "{input.domtblout}" \
+                --retain_pfam_hits "{input.pfam}" \
                 --retain_blastp_hits "{input.blastp}" \
                 -O "{params.out_parent_dir}"
-            test -s "{output.pep}" && test -s "{output.cds}" && test -s "{output.gff3}" && test -s "{output.bed}"
-        ) &> "{log}"
-        '''
 
-# ───────────────────────────────────────────────
-# Rule: Aggregate merged outputs
-# ───────────────────────────────────────────────
-rule aggregate_results:
-    input:
-        lambda wc: expand(
-            f"{TRANSDECODER_OUT_DIR}/{{prefix}}/predicted/chunk_{{chunk_id}}.fasta.transdecoder.{{ext}}",
-            prefix   = wc.prefix,
-            chunk_id = get_chunk_ids(wc),
-            ext      = wc.ext
-        )
-    output:
-        f"{TRANSDECODER_OUT_DIR}/merged/{{prefix}}.transdecoder.{{ext}}"
-    log:
-        f"{TRANSDECODER_LOG_DIR}/aggregate/{{prefix}}.{{ext}}.log"
-    shell:
-        r'''
-        set -euo pipefail
-        (
-            echo "## Aggregating .{wildcards.ext} for {wildcards.prefix}"
-            if [[ "{wildcards.ext}" == "gff3" ]]; then
-                head -n 1 "{input[0]}" > "{output}"
-                grep -h -v '^#' {input} >> "{output}"
-            else
-                cat {input} > "{output}"
-            fi
+            # Ensure destination exists, then move results
+            mkdir -p "$(dirname "{output.pep}")"
+            BASENAME=$(basename "{input.fasta}")
+
+            mv "{params.out_parent_dir}/${BASENAME}.transdecoder.pep"  "{output.pep}"
+            mv "{params.out_parent_dir}/${BASENAME}.transdecoder.cds"  "{output.cds}"
+            mv "{params.out_parent_dir}/${BASENAME}.transdecoder.gff3" "{output.gff3}"
+            mv "{params.out_parent_dir}/${BASENAME}.transdecoder.bed"  "{output.bed}"
         ) &> "{log}"
         '''
