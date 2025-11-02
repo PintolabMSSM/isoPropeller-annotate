@@ -6,5 +6,5 @@ dependencies:
   - transdecoder >=5.5.0
   - hmmer >=3.3.2
   - blast >=2.13.0
-  - diamond >=2.1.6
+  - diamond =2.1.12
   - biopython >=1.79

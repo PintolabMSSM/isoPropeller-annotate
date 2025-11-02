@@ -110,11 +110,7 @@ rule diamond_blastp:
         set -euo pipefail
         (
             echo "## DIAMOND chunk {wildcards.chunk_id} ({wildcards.prefix})"
-            
-            TMP_OUT="{output}.tmp.$RANDOM"
-            set +e
             diamond blastp \
-                --block-size 5 \
                 --sensitive \
                 --query "{input}" \
                 --db "{params.uniref90}" \
@@ -122,26 +118,7 @@ rule diamond_blastp:
                 --outfmt 6 \
                 --evalue 1e-5 \
                 --threads {threads} \
-                --out "$TMP_OUT"
-            EXIT_CODE="$?"
-            set -e
-        
-        # Check the result
-        # The job is a success if:
-        #   1. The exit code is 0 (clean exit, even if no hits).
-        #   OR
-        #   2. The exit code is non-zero, BUT the output file is not empty (partial success).
-        if [ "$EXIT_CODE" -eq 0 ] || [ -s "$TMP_OUT" ]; then
-            echo "DIAMOND finished with exit code $EXIT_CODE. Output file is present."
-            # On success, atomically move the temporary file to the final output
-            mv "$TMP_OUT" "{output}"
-            exit 0
-        else
-            echo "DIAMOND failed with exit code $EXIT_CODE and produced no output."
-            # Clean up the empty/failed temp file
-            rm -f "$TMP_OUT"
-            exit 1
-        fi
+                --out "{output}"
 
         ) &> "{log}"
         '''

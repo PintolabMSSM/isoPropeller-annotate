@@ -16,7 +16,7 @@ while True:
         break
     cid = f"{chunk_num:05d}"
     with (outdir / f"chunk_{cid}.fasta").open("w") as fh:
-        SeqIO.write(chunk, fh, "fasta")
+        SeqIO.write(chunk, fh, "fasta-2line")
     chunk_ids.append(cid)
     chunk_num += 1
 
