@@ -7,7 +7,8 @@ use-singularity:  true
 use-conda:        true
 
 # --- Define the generic cluster submit command --- #
-cluster-generic-submit-cmd: bsub -W {resources.runtime} -n 12 -M {resources.mem_mb} -P {resources.project} -q {resources.queue} -R {resources.span} -oo clusterlogs/%J.OU
+#cluster-generic-submit-cmd: bsub -W {resources.runtime} -n 12 -M {resources.mem_mb} -P {resources.project} -q {resources.queue} -R {resources.span} -oo clusterlogs/%J.OU
+cluster-generic-submit-cmd: bsub -W {resources.runtime} -n 12 -M {resources.mem_mb} -q {resources.queue} -R {resources.span} -oo clusterlogs/%J.OU
 
 # --- Define default resources for all rules --- #
 default-resources:
