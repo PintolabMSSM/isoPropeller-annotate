@@ -5,4 +5,4 @@ channels:
  - hvbakel
 dependencies:
  - omics-toolkit >=1.3
- - isopropeller >=1.8.6
+ - isopropeller >=1.9.2
