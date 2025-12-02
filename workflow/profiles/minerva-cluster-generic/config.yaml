@@ -13,7 +13,7 @@ cluster-generic-submit-cmd: bsub -W {resources.runtime} -n 12 -M {resources.mem_
 default-resources:
   mem_mb:   25000
   queue:    "express"
-  project:  "acc_pintod02c"
+  project:  "acc_EPIASD"
   runtime:  "12h"
   span:     "\"span[hosts=1]\""
 
