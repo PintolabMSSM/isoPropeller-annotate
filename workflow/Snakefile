@@ -89,6 +89,7 @@ include: "rules/08_DEG.smk"
 include: "rules/09_collapsed-ORFs.smk"
 include: "rules/10_isoformswitchanalyzer_inputs.smk"
 include: "rules/11_pogo.smk"
+include: "rules/12_isoPropeller-plots.smk"
 
 
 rule all:
@@ -141,3 +142,6 @@ rule all:
 
         # --- Step 11: Run PoGo analysis to detect mass-spec peptides from a reference file ---
         f"11_pogo/{PREFIX}_PoGo_mm1_1MM.bed",
+
+        # --- Step 12: Generate isoPropeller annotate plots ---
+        f"12_plots/{PREFIX}_gene-isoform-read_stats.txt",

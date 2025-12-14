@@ -1,0 +1,32 @@
+name: annotate-ggplot2
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconductor-biomart
+  - r-data.table
+  - r-devtools>=2.4.5
+  - r-dplyr
+  - r-ggplot2
+  - r-ggrepel
+  - r-ggvenn
+  - r-gridextra
+  - r-ini
+  - r-lubridate
+  - r-odbc
+  - r-patchwork
+  - r-pheatmap
+  - r-plyr
+  - r-pryr
+  - r-rcolorbrewer
+  - r-reshape2
+  - r-rmariadb
+  - r-r.utils
+  - r-tidyverse
+  - r-upsetr
+  - r-formattable
+  - r-ggalluvial
+  - r-svglite
+  - r-argparse
+  - r-getopt
