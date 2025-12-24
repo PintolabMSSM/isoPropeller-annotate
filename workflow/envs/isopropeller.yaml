@@ -2,6 +2,7 @@ name: isopropeller
 channels:
  - conda-forge
  - bioconda
+ - pintod02
  - hvbakel
 dependencies:
  - omics-toolkit >=1.3
