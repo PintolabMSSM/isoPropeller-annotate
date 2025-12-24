@@ -15,3 +15,4 @@ dependencies:
  - bioconductor-rtracklayer>=1.48.0
  - bioconductor-biostrings>=2.66
  - perl-bioperl
+ - parallel
