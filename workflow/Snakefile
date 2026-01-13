@@ -93,7 +93,7 @@ include: "rules/09_collapsed-ORFs.smk"
 include: "rules/10_isoformswitchanalyzer_inputs.smk"
 include: "rules/11_pogo.smk"
 include: "rules/12_isoPropeller-plots.smk"
-
+include: "rules/13_augmented-reference.smk"
 
 rule all:
     input:
