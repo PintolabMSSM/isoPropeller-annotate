@@ -4,6 +4,9 @@ prefix: PREFIX
 # Path to temporary directory
 tmpdir:                   /sc/arion/scratch/pintod02/
 
+# Prefix to use for the merged isoform file and final merged isoforms
+merged_isoform_prefix:    "ISOP"
+
 # Queueing system project allocation
 project_allocation:       acc_pintod02b
 

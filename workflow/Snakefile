@@ -41,6 +41,9 @@ def as_bool(val):
 # Define Output Directory Structure
 # ───────────────────────────────────────────────
 
+# Defin
+MERGED_ISOFORM_PREFIX = config.get("merged_isoform_prefix", "ISOP")
+
 # Define a local variable for prefix
 PREFIX = config["prefix"]
 
@@ -145,3 +148,7 @@ rule all:
 
         # --- Step 12: Generate isoPropeller annotate plots ---
         f"12_plots/{PREFIX}_gene-isoform-read_stats.txt",
+
+        # --- Step 13: Generate augmented reference ---
+        f"13_augmented-reference/{PREFIX}_reference_im_reclocus.gtf",
+        f"13_augmented-reference/{PREFIX}_reference_im_reclocus_splicechains.gtf",

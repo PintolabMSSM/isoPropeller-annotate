@@ -71,9 +71,6 @@ rule run_cpat3_len:
 
             # Find the correct CPAT executable (cpat or cpat.py)
             CPAT_CMD=$(command -v cpat || command -v cpat.py)
-            if [ -z "$CPAT_CMD" ]; then
-                echo "Error: Neither 'cpat' nor 'cpat.py' found." >&2; exit 1
-            fi
             echo "Using CPAT command: $CPAT_CMD"
 
             # Run CPAT using the reference genome (-g) and a BED file of transcripts (-r)
