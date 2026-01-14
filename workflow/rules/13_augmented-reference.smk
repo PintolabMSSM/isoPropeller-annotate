@@ -39,7 +39,7 @@ rule create_augmented_refs:
                 | sort \
                 | uniq \
                 > "{output.aug_isopropeller}.tmp.drop"
-            gtf-filter-attributes.pl -v -a transcript_id -m "{output.aug_isopropeller}.tmp.drop" > "{output.aug_splicechains}"
+            gtf-filter-attributes.pl -v -a transcript_id -m "{output.aug_isopropeller}.tmp.drop" "{output.aug_isopropeller}" > "{output.aug_splicechains}"
             rm -f "{output.aug_isopropeller}.tmp."*
         
         ) &> "{log}"
