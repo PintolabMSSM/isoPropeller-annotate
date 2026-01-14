@@ -20,7 +20,6 @@ rule create_augmented_refs:
         SNAKEDIR + "envs/omics-pipelines.yaml"
     shell:
         r'''
-        set -euo pipefail
         (
             echo "## Generating augmented references ##"
             
@@ -32,13 +31,10 @@ rule create_augmented_refs:
             gff2bed.pl "{output.aug_isopropeller}.tmp.gff" > "{output.aug_isopropeller}.tmp.bed"
             bed2splicechains.pl "{output.aug_isopropeller}.tmp.bed" > "{output.aug_isopropeller}.tmp.splicechains"
             cut -f 2 "{output.aug_isopropeller}.tmp.splicechains" \
-                | grep , \
-                | grep "{params.isof_prefix}" \
-                | perl -pe 's/,/\n/g' \
-                | grep -v "{params.isof_prefix}" \
-                | sort \
-                | uniq \
-                > "{output.aug_isopropeller}.tmp.drop"
+                    | awk -v p="{params.isof_prefix}" '$0 ~ "," && $0 ~ p {{ gsub(/,/, "\\n"); print }}' \
+                    | awk -v p="{params.isof_prefix}" '$0 !~ p' \
+                    | sort -u \
+                    > "{output.aug_isopropeller}.tmp.drop"
             gtf-filter-attributes.pl -v -a transcript_id -m "{output.aug_isopropeller}.tmp.drop" "{output.aug_isopropeller}" > "{output.aug_splicechains}"
             rm -f "{output.aug_isopropeller}.tmp."*
         
