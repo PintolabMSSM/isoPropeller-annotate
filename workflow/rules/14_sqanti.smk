@@ -35,14 +35,18 @@ rule run_sqanti3:
             echo "Using Python: $SQANTI_PY"
             echo "Using Script: $SQANTI_SCRIPT"
 
-            $SQANTI_PY $SQANTI_SCRIPT {input.isop_fasta} {input.isop_gtf} {input.genome_fasta} \
+            $SQANTI_PY $SQANTI_SCRIPT \
+                --isoforms         "{input.isop_fasta}" \
+                --refGTF           "{input.isop_gtf}" \
+                --refFasta         "{input.genome_fasta}" \
                 --polyA_motif_list "{input.motifs}" \
                 --polyA_peak       "{input.poly_bed}" \
                 --CAGE_peak        "{input.cage}" \
                 --coverage         "{input.intron}" \
-                --cpus             {threads} \
-                --dir              "{output.outdir}" \
-                --output           "{params.prefix}"
+                --report            pdf \
+                -t                  {threads} \
+                -d                 "{output.outdir}" \
+                -o                 "{params.prefix}"
         
         ) &> "{log}"
         '''
