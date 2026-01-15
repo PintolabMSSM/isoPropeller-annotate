@@ -24,9 +24,18 @@ rule run_sqanti3:
     shell:
         r'''
         (
-            echo "## Running sqanti3 ##"
+            echo "## Dynamically Locating SQANTI3 Paths ##"
             
-            sqanti3_qc.py {input.isop_fasta} {input.isop_gtf} {input.genome_fasta} \
+            # Locate the specific python with the sqanti3 environment
+            SQANTI_PY=$(find /conda -name python | grep "/envs/sqanti3/" | head -n 1)
+            
+            # Locate the QC script
+            SQANTI_SCRIPT=$(find /opt2 -name sqanti3_qc.py | head -n 1)
+            
+            echo "Using Python: $SQANTI_PY"
+            echo "Using Script: $SQANTI_SCRIPT"
+
+            $SQANTI_PY $SQANTI_SCRIPT {input.isop_fasta} {input.isop_gtf} {input.genome_fasta} \
                 --polyA_motif_list "{input.motifs}" \
                 --polyA_peak       "{input.poly_bed}" \
                 --CAGE_peak        "{input.cage}" \
