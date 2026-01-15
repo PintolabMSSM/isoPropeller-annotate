@@ -94,6 +94,7 @@ include: "rules/10_isoformswitchanalyzer_inputs.smk"
 include: "rules/11_pogo.smk"
 include: "rules/12_isoPropeller-plots.smk"
 include: "rules/13_augmented-reference.smk"
+include: "rules/14_sqanti.smk"
 
 rule all:
     input:
@@ -152,3 +153,6 @@ rule all:
         # --- Step 13: Generate augmented reference ---
         f"13_augmented-reference/{PREFIX}_reference_im_reclocus.gtf",
         f"13_augmented-reference/{PREFIX}_reference_im_reclocus_splicechains.gtf",
+
+        # --- Step 14: Run sqanti from docker ---
+        f"14_sqanti/{PREFIX}/{PREFIX}_sqanti3_qc_report.pdf"
