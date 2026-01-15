@@ -21,6 +21,11 @@ mkdir -p "${CONDA_PKGS_DIRS}"
 export GIT_REPODIR
 export CONDA_PKGS_DIRS
 
+# Try using a singularity cache dir
+export SINGULARITY_TMPDIR="/sc/arion/scratch/${USER}/singularity/tmpdir"
+export SINGULARITY_CACHEDIR="/sc/arion/scratch/${USER}/singularity/cachedir"
+mkdir -p $SINGULARITY_TMPDIR $SINGULARITY_CACHEDIR
+
 
 ########################################
 # DEFINE DEFAULT SNAKEMAKE PARAMETERS  #
