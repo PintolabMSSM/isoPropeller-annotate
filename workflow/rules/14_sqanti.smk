@@ -36,6 +36,7 @@ rule run_sqanti3:
             echo "Using Script: $SQANTI_SCRIPT"
 
             $SQANTI_PY $SQANTI_SCRIPT \
+                --force_id_ignore \
                 --isoforms         "{input.isop_fasta}" \
                 --refGTF           "{input.isop_gtf}" \
                 --refFasta         "{input.genome_fasta}" \
