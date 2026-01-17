@@ -12,11 +12,11 @@ rule run_sqanti3:
         cage            = config["cage_peaks_refTSS"],
         intron          = config["intron_coverage"]
     output:
-        report          = "14_sqanti/{prefix}/{prefix}_sqanti3_qc_report.pdf"
+        report          = "14_sqanti/{prefix}/{prefix}_SQANTI3_report.pdf"
     threads: 12
     params:
         outdir          = "14_sqanti/{prefix}/",
-        prefix          = "{prefix}_sqanti3"
+        prefix          = "{prefix}"
     log:
         "logs/14_sqanti/{prefix}.log"
     container:
@@ -25,18 +25,19 @@ rule run_sqanti3:
         r'''
         (
             echo "## Dynamically Locating SQANTI3 Paths ##"
-            
+
             # Create output dir
-            mkdir -p {params.outdir}        
-            
+            mkdir -p {params.outdir}
+
             # Activate the sqanti3 environment within the docker
             . /conda/miniconda3/bin/activate sqanti3
-            
+
             # Locate the QC script
             SQANTI_SCRIPT=$(find /opt2 -name sqanti3_qc.py | head -n 1)
-            
-            echo "Using Python: $(which python)"
-            echo "Using TD2: $(which TD2.LongOrfs)"
+
+            # Indicate which binaries we're using
+            echo "Using Python: $(command -v python || echo 'Not Found')"
+            echo "Using TD2: $(command -v TD2.LongOrfs || echo 'Not Found')"
             echo "Using Script: $SQANTI_SCRIPT"
 
             python $SQANTI_SCRIPT \
@@ -52,6 +53,6 @@ rule run_sqanti3:
                 -t                  {threads} \
                 -d                 "{params.outdir}" \
                 -o                 "{params.prefix}"
-        
+
         ) &> "{log}"
         '''

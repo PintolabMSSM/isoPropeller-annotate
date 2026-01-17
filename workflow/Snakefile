@@ -155,4 +155,4 @@ rule all:
         f"13_augmented-reference/{PREFIX}_reference_im_reclocus_splicechains.gtf",
 
         # --- Step 14: Run sqanti from docker ---
-        f"14_sqanti/{PREFIX}/{PREFIX}_sqanti3_qc_report.pdf"
+        f"14_sqanti/{PREFIX}/{PREFIX}_SQANTI3_report.pdf"
