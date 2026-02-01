@@ -16,23 +16,13 @@ conda create -c defaults -c bioconda -c conda-forge -n snakemake snakemake mamba
 For installation in other environments we recommend miniconda, which is a free minimal installer for [conda](https://docs.conda.io/en/latest/miniconda.html). After installation and initialization of miniconda the following 'conda create' command can be used to set up the isoseq pipeline.
 
 ```
-conda create -c defaults -c bioconda -c conda-forge -n snakemake snakemake mamba
+conda create -c defaults -c bioconda -c conda-forge -n snakemake snakemake
 ```
 
-In addition to the `snakemake` conda environment there are several git repositories with additional scripts required by the pipeline. By default the pipeline expects these repositories to be available in the `opt` subdirectory of your home directory ($HOME/opt), but it is possible to specify a different location in the Snakemake config.yaml file. The list of repositories is as follows:
 
-```
-SQANTI3:          : Follow installation notes on https://github.com/ConesaLab/SQANTI3
-cdna_cupcake:     : Follow installation notes on https://github.com/ConesaLab/SQANTI3
-isoseq_pipeline   : git clone git@github.com:PintolabMSSM/isoseq_pipeline.git
-utility           : git clone git@bitbucket.org:hvbakel/utility.git
-igb_tools         : git clone git@bitbucket.org:hvbakel/igb-tools.git
-ngs_tools         : git clone git@bitbucket.org:hvbakel/ngs-tools.git
-minerva_queue_lsf : git clone git@bitbucket.org:hvbakel/minerva-queue-lsf.git
-```
-The `minerva_queue_lsf` repository provides the `submitjob` script required for the pfamscan and interpro scan tasks in the pipeline. Both these tasks partition the isoform sequences in chunks for parallel processing on the 'Minerva' compute cluster, which uses the LSF queueing system. Other environments will require a modification of the submitjob script.
 
 ## Running the isoPropeller-collapse pipeline
+
 The `isoPropeller-collapse` pipeline is developed in Snakemake and uses a standardized structure that is expected by frequent Snakemake users and allows for easy deployment in modular workflows. For convenience we also provide a `run-isoPropeller-collapse` wrapper script that simplifies execution of the pipeline. The wrapper script expects three input files per analysis with the following standardized file name convention:
 
 ```
@@ -49,7 +39,7 @@ MAP_chr1_0_1.1   0        4              69             7
 MAP_chr1_0_1.2   2        0              17             0
 MAP_chr1_1_1.1   0        0              0              14
 MAP_chr1_1_1.2   0        9              9              0
-MAP_chr1_1.3   0        0              4              0
+MAP_chr1_1.3     0        0              4              0
 ```
 
 #### Starting the pipeline
@@ -152,7 +142,7 @@ The isoPropeller-collapse pipeline is organized as a series of tasks, each of wh
 
 #### subdir/interproscan/
 
-High-level functional characterization using the InterPro database. This tool scans protein sequences against multiple signatures (e.g., Pfam, SUPERFAMILY, MobiDBLite) and provides GO terms and pathway information.
+High-level functional characterization using the InterPro database. This tool scans ORF protein sequences against multiple domain/motif databases and provides GO terms and pathway information.
 
 - **`chunks/`**: Temporary subsets of the amino acid FASTA used for parallelization.
 - **`predicted/`**: Raw output chunks in TSV, GFF3, and XML formats.
@@ -181,7 +171,7 @@ Dedicated domain annotation using the Pfam-A database via `pfam_scan.pl`. This p
 - **`{prefix}_genomic_element_overlaps.txt`**: A comprehensive master table summarizing intersections with several key genomic features, including:
   - **RepeatMasker (RMSK)**: Identification of transcripts overlapping with transposable elements or low-complexity repeats.
   - **Ultraconserved Elements**: Overlaps with highly conserved genomic regions.
-  - **PhyloCSF (v31 & v35)**: Comparative genomics data indicating the likelihood that a region is a conserved coding sequence across species.
+  - **PhyloCSF**: Comparative genomics data indicating the likelihood that a region is a conserved coding sequence across species.
   - **Segmental Duplications**: Identification of transcripts residing within highly repetitive/duplicated regions of the genome.
 - **`{prefix}_SV_overlaps.txt`**: A specialized report focusing on Structural Variant (SV) context. It maps isoforms against control and non-neutral SV datasets to identify transcript structures potentially altered or created by genomic rearrangements.
 
@@ -259,7 +249,7 @@ Dedicated domain annotation using the Pfam-A database via `pfam_scan.pl`. This p
 
 ### 11_pogo
 
-**Description:** This directory facilitates the proteogenomic validation of the transcript isoforms. The rules within specifically format the predicted protein sequences and their corresponding genomic locations to allow for the precise mapping of experimental mass-spec peptide data back to the genome.
+**Description:** This directory facilitates the **proteogenomic characterization** of transcript isoforms. The rules within specifically format the predicted protein sequences and their corresponding genomic locations to allow for the precise mapping of experimental mass-spec peptide data back to the genome.
 
 **Contents:**
 
