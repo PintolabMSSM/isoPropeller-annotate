@@ -1,7 +1,11 @@
-# isoPropeller-annotate
+## isoPropeller-annotate
+
 Snakemake pipeline to annotate isoforms identified by the isoPropeller-collapse pipeline. The starting point for the pipeline is a `.gtf` isoform file, and an `isoform count matrix` with the raw read counts for each isoform (rows) in all samples (columns).
 
+
+
 ## Installation
+
 Installation of the external software packages required by isoPropeller-annotate is largely handled by the pipeline itself, however there are a few prerequisites that need to be in place before running the pipeline. First, the pipeline requires that a conda environment named `snakemake` is present in your environment. This can be installed on the Mount Sinai 'Minerva' cluster using the following commands. 
 
 ```bash
@@ -23,7 +27,7 @@ conda create -c defaults -c bioconda -c conda-forge -n snakemake snakemake
 
 ## Running the isoPropeller-annotate pipeline
 
-The `isoPropeller-annotate` pipeline is developed in Snakemake and uses a standardized structure that is expected by frequent Snakemake users and allows for easy deployment in modular workflows. For convenience we also provide a `run-isoPropeller-annotate` wrapper script that simplifies execution of the pipeline. The wrapper script expects three input files per analysis with the following standardized file name convention:
+The `isoPropeller-annotate` pipeline is developed in Snakemake and uses a standardized structure that is expected by frequent Snakemake users and allows for easy deployment in modular workflows. For convenience we also provide a `run-isoPropeller-annotate` wrapper script that simplifies execution of the pipeline. The wrapper script should be started in an analysis folder containing five input files with the following standardized file name convention:
 
 ```
 <PREFIX>.gtf          :  GTF file with isoPropeller transcripts
@@ -35,11 +39,11 @@ The `isoPropeller-annotate` pipeline is developed in Snakemake and uses a standa
 
 Several versions of these files are produced by the **isoPropeller-collapse** pipeline in different output folders.
 
-* **05_isoPropeller-filter**
-  This folder contains a filtered set of isoforms after removing antisense transcripts matching splice chains of a sense transcript, mono-exon pre-mRNAs, mono-exon TSS fragments, non-canonical splice junctions, pseudoautosomal regions (PARs), highly repetitive regions, template switching artifacts, and potentially mismapped terminal exons in segmental duplications.
-* **07_isoPropeller-defrag**
+* **05_isoPropeller-filter** (File prefix: _ISOP_depth-gt1_isoqc_pass_)
+  This folder contains a filtered set of collapsed isoforms after removing antisense transcripts matching splice chains of a sense transcript, mono-exon pre-mRNAs, mono-exon TSS fragments, non-canonical splice junctions, pseudoautosomal regions (PARs), highly repetitive regions, template switching artifacts, and potentially mismapped terminal exons in segmental duplications.
+* **07_isoPropeller-defrag** (File prefix: _ISOP_depth-gt1_isoqc_pass_defrag_)
   Filtered isoforms from the previous step that are additionally collapsed to remove incomplete isoform fragments that are fully contained within larger isoforms. This output folder contains two count matrices, one ending in `<PREFIX>_exp.txt` that contains the original counts of the remaining isoforms, and one ending in `<prefix>_exp_redist.txt` where the read counts from isoform fragments are proportionally redistributed to their parent transcripts.
-* **08_isoPropeller-defrag-pruned**
+* **08_isoPropeller-defrag-pruned** (File prefix: _ISOP_depth-gt1_isoqc_pass_defrag_pruned_)
   Same as above, but with an additional filter step applied to keep only the top` prune_low_expressed_isoforms_retain_pct` percentile of the most highly expressed isoforms for each locus (default 97th percentile) in  `prune_low_expressed_isforms_min_samples` or more samples (default 2 or more). The purpose of this additional step is to remove lowly-expressed isoforms per locus that may represent biological noise.
 
  
