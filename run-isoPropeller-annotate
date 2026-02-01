@@ -44,7 +44,7 @@ EXTRA_SNAKEMAKE_OPTS=()
 show_help() {
   cat << EOF
 
-Usage: run-isoPropeller-annotate -i <samples-csv> [options] [Snakemake args]
+Usage: run-isoPropeller-annotate -i <file-prefix> [options] [Snakemake args]
 
 Required:
   -i <prefix>             File prefix for the isopropeller-collapse outputs

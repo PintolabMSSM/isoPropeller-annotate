@@ -2,7 +2,7 @@
 Snakemake pipeline to annotate isoforms identified by the isoPropeller-collapse pipeline. The starting point for the pipeline is a `.gtf` isoform file, and an `isoform count matrix` with the raw read counts for each isoform (rows) in all samples (columns).
 
 ## Installation
-Installation of the external software packages required by isoPropeller-collapse is largely handled by the pipeline itself, however there are a few prerequisites that need to be in place before running the pipeline. First, the pipeline requires that a conda environment named `snakemake` is present in your environment. This can be installed on the Mount Sinai 'Minerva' cluster using the following commands. 
+Installation of the external software packages required by isoPropeller-annotate is largely handled by the pipeline itself, however there are a few prerequisites that need to be in place before running the pipeline. First, the pipeline requires that a conda environment named `snakemake` is present in your environment. This can be installed on the Mount Sinai 'Minerva' cluster using the following commands. 
 
 ```bash
 module purge all
@@ -21,53 +21,60 @@ conda create -c defaults -c bioconda -c conda-forge -n snakemake snakemake
 
 
 
-## Running the isoPropeller-collapse pipeline
+## Running the isoPropeller-annotate pipeline
 
-The `isoPropeller-collapse` pipeline is developed in Snakemake and uses a standardized structure that is expected by frequent Snakemake users and allows for easy deployment in modular workflows. For convenience we also provide a `run-isoPropeller-collapse` wrapper script that simplifies execution of the pipeline. The wrapper script expects three input files per analysis with the following standardized file name convention:
-
-```
-<PREFIX>.gtf     : gtf file, produced by isoPropeller-collapse
-<PREFIX>_exp_renamed.txt  : raw flnc read counts for each isoform (rows) in all samples (columns)
-```
-
-#### Countlist input file
-The tab-delimited `<PREFIX>_exp_reanmed.txt` file should contain the counts for all isoforms across all samples. An example counts file is shown below:
+The `isoPropeller-annotate` pipeline is developed in Snakemake and uses a standardized structure that is expected by frequent Snakemake users and allows for easy deployment in modular workflows. For convenience we also provide a `run-isoPropeller-annotate` wrapper script that simplifies execution of the pipeline. The wrapper script expects three input files per analysis with the following standardized file name convention:
 
 ```
-transcript_id     AN08161  CBL-DP19_hifi  CBL-DP20_hifi  CBL-DP21_hifi
-MAP_chr1_0_1.1   0        4              69             7
-MAP_chr1_0_1.2   2        0              17             0
-MAP_chr1_1_1.1   0        0              0              14
-MAP_chr1_1_1.2   0        9              9              0
-MAP_chr1_1.3     0        0              4              0
+<PREFIX>.gtf          :  GTF file with isoPropeller transcripts
+<PREFIX>_exp.txt      :  Isoform count file
+<PREFIX>_tss.bed      :  Bed-formatted file with transcription start sites per isoform
+<PREFIX>_tts.bed      :  Bed-formatted file with transcription termination sites per isoform
+<PREFIX>.trackgroups  :  Trackgroup file mapping samples to sample groups/conditions
 ```
+
+Several versions of these files are produced by the **isoPropeller-collapse** pipeline in different output folders.
+
+* **05_isoPropeller-filter**
+  This folder contains a filtered set of isoforms after removing antisense transcripts matching splice chains of a sense transcript, mono-exon pre-mRNAs, mono-exon TSS fragments, non-canonical splice junctions, pseudoautosomal regions (PARs), highly repetitive regions, template switching artifacts, and potentially mismapped terminal exons in segmental duplications.
+* **07_isoPropeller-defrag**
+  Filtered isoforms from the previous step that are additionally collapsed to remove incomplete isoform fragments that are fully contained within larger isoforms. This output folder contains two count matrices, one ending in `<PREFIX>_exp.txt` that contains the original counts of the remaining isoforms, and one ending in `<prefix>_exp_redist.txt` where the read counts from isoform fragments are proportionally redistributed to their parent transcripts.
+* **08_isoPropeller-defrag-pruned**
+  Same as above, but with an additional filter step applied to keep only the top` prune_low_expressed_isoforms_retain_pct` percentile of the most highly expressed isoforms for each locus (default 97th percentile) in  `prune_low_expressed_isforms_min_samples` or more samples (default 2 or more). The purpose of this additional step is to remove lowly-expressed isoforms per locus that may represent biological noise.
+
+ 
 
 #### Starting the pipeline
-We recommend organizing each isoPropeller-collapse analysis in separate folder. When ready, the Snakemake pipeline wrapper script can be used as follows:
+We recommend organizing each isoPropeller-annotate analysis in separate folder. When ready, the Snakemake pipeline wrapper script can be used as follows:
 
 ```
-run-isoPropeller-collapse -i <PREFIX>
+run-isoPropeller-annotate -i <PREFIX>
 ```
 
-#### Arguments for the run-isoPropeller-collapse wrapper script
+#### Arguments for the run-isoPropeller-annotate wrapper script
 
 ```
-   Usage: run-isoPropeller-collapse -i <PREFIX>
+Usage: run-isoPropeller-annotate -i <file-prefix> [options] [Snakemake args]
 
-   Arguments:
-    -i <string>
-      File prefix for the .gtf and _exp_renamed.txt file
-    -D 
-      Run pipeline in debug mode to show the commands that will be executed.
-    -help
-      This help message
+Required:
+  -i <prefix>             File prefix for the isopropeller-collapse outputs
+
+Optional:
+  -C <config.yaml>        Use custom config file
+  -D                      Dry run with printed shell commands (-p -n)
+  -T                      Touch outputs only
+  -help                   Show this help message
+
+Extra Snakemake arguments (passed through):
+  Any other flags will be forwarded directly to Snakemake and
+  override defaults like --profile or --executor if provided.
 ```
 
 
 
 ## Overview of pipeline outputs
 
-The isoPropeller-collapse pipeline is organized as a series of tasks, each of which has their own output folder. An overview of each task and the outputs it produces is provided below.
+The isoPropeller-annotate pipeline is organized as a series of tasks, each of which has their own output folder. An overview of each task and the outputs it produces is provided below.
 
 
 
