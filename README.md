@@ -74,126 +74,233 @@ run-isoPropeller-collapse -i <PREFIX>
 ```
 
 
-## Overview of pipeline tasks and outputs
-The isoPropeller-collapse pipeline is organized as a series of tasks, each of which has their own output folder. An overview of each tasks and the outputs it produces is provided below.
 
-### 01_sqanti3
+## Overview of pipeline outputs
 
-The first stage of the pipeline is to run SQANTI3 to generate classification and quality control files for all isoforms in the provided gtf file. The 01_sqanti3 folder contains all standard output files from sqanti3, including:
-
-* **{prefix}_classification.txt** (classification file)
-* **{prefix}_corrected.gtf.cds.gff** (GTF file of aligned isoforms)
-* **{prefix}_junctions.txt** (junction file)
-* **{prefix}.params.txt** (summary of sqanti3 run parameters)
-* **{prefix}_corrected.fasta** (isoform fasta file, after genome correction)
-* **{prefix}_corrected.faa** (Translations of ORFs detected in isoforms during the sqanti3 analysis)
-
-For a full overview of sqanti3 outputs and file formats, see the section on [Sqanti3 main outputs](https://github.com/ConesaLab/SQANTI3/wiki/Understanding-the-output-of-SQANTI3-QC#main) in the github documentation provided in the [Sqanti3](https://github.com/ConesaLab/SQANTI3/) repository.
+The isoPropeller-collapse pipeline is organized as a series of tasks, each of which has their own output folder. An overview of each task and the outputs it produces is provided below.
 
 
-### 02_sqanti3_patched
 
-The purpose of this task is to process the sqanti3 output and patch a few issues that impact downstream data analysis. The following sub-tasks are performed as part of patching process:
+### 01_isoform_counts
 
-* **CAGE distance correction**. In reviewing the distance to CAGE peaks reported in the Sqanti3 classification file we noticed that the distances are not always as expected. In this subtask we therefore use `bedtools` to calculate the distance in basepairs between the 5' end of each isoform and the nearest CAGE tag. A distance of zero indicates that the 5' end is within a CAGE tag.
-* **PolyA peak distance correction**. This step is analogous to the CAGE analysis, but now using `bedtools` to calculate the distance between the 3' end of an isoform to the nearest PolyA tag.
-* **Add information on isoforms that extend known gene annotations**. In this subtask each isoform is compared to reference annotations to determine whether the isoform extends beyond the boundaries of known reference annotations. This is useful to assess potential novel 5' and 3' exons. Potential gene joins (based on _any_ exon overlap on the same strand with reference transcripts) are also indicated, and used to reclassify fusion isforms annotated by sqanti as either 'fusion_known' (there are know fusion transcripts between the gene loci in the reference annotation) or 'fusion_novel' (the reference annotation does not contain fusion transcripts between the gene loci).
-* **Collapse novel gene loci**. The sqanti3 classification file assigns a distinct novelGeneID to each isoform found in intergenic regions. That means that even if two intergenic isoforms overlap, each receives a different novelGeneID. The purpose of this subtask is to identify overlaps (_any_ exon overlap on the same strand) between novelGene isoforms and collapse these into new loci that are assigned a new novelGeneID for all isoforms in the loci. As part of this step, all novelGeneIDs are renumbered.
-* **Annotate fusions between known and novelGene loci**. Sqanti3 only considers known genes when evaluating potential fusion isoforms because it only compares between isoforms and the reference genome annotations. In this step, potential fusion transcripts between known and novelGenes are considered and fusions between known and novel genes (any exon boundary overlap) are reclassified and are assigned a 'fusion_novel_revised_from_<original-structural-classification>' tag.
-* **For isoforms that have a single best-hit transcript, assign the geneID of the best-hit transcript**. This fixes some issues where multiple associated_geneIDs were assigned to an isoform with only a single best-hit transcript.
+**Description:** This directory serves as the entry point for the pipeline's expression data. It contains the standardized isoform-level quantification derived from upstream processing.
 
-As part of this task, several patched output files are produced:
-* **{prefix}_patched_classification.txt** (An updated classification file that includes renumbered novelGene loci, updated fusion_known/fusion_novel structural categories, and extra columns with bedtools distances (bedtools_closest_cage_peak and bedtools_closest_polyA_peak), gene extensions, and fusion evidence)
-* **{prefix}_patched.gtf** (Updated gtf file that has the revised novelGeneIDs in the gene_ID tag)
-* **{prefix}_patched.gff** (Patched annotation track in gff format)
-* **{prefix}_patched.gff** (Patched annotation track in bed format)
-* **{prefix}_stats_sqanti-reclassify.txt** (Overview of how many isoforms were reclassified during the patching process)
-* **{prefix}_stats_novelgene-overlaps-reclassify.txt** 
+**Contents:**
 
-### 03_isoform_counts
-Since the count matrix is provided as an input to the isoPropeller-collapse pipeline we simply copy the count matrix file here.
-### 04_isoform_terminal_exons_in_segdups
-This pipeline task evaluates whether there are isoforms who have one, two, three, or four terminal exons mapping in a segmental duplication and where the terminal intron spans one or more other genes. These isoforms are candidates for potentially mis-mapped terminal exons due to segmental duplications, which can cause spurious gene fusions / read-through annotations. The task produces the following outputs:
-
-* **{prefix}_mismapped-all.txt** (Listing of PBIDs for isoforms meeting the terminal exon mismapping criteria)
-* **{prefix}_mismapped-all.bed** (Track file in bed format for all isoforms meeting the mismapping criteria. Can be used for evaluation in the UCSC browser)
-* **{prefix}_mismaplocus_regions.txt** (Listing of unique regions with potentially mismapped isoforms to facilitate selection in the UCSC genome browser)
+- **`{prefix}_isoform-counts.txt`**: A tab-delimited matrix of raw transcript counts. This file is the primary reference for all subsequent differential expression and isoform usage calculations.
 
 
-### 05_cpatv3
-During this step, [CPAT version 3](https://github.com/liguowang/cpat) is run on all isoforms to produce a list of annotated ORFs greater than 6 amino acids (18 nt), ORF sequences and coding potential scores. The CPAT analysis is run twice using two different settings to detect the best ORF based on probability score (`cpatv3p` output file set) or length (`cpatv3l` output file set). Each output file set contains the following main outputs:
 
-* **{prefix}.ORF_prob.best.tsv** (ORF coordinates and coding probability for the best hits)
-* **.ORF_seqs.fa** (Coding sequences for predicted ORFs)
-  
+### 02_ORF_prediction
 
-### 06_interpro
-This task runs [interproscan](https://www.ebi.ac.uk/interpro/about/interproscan/) on all isoform nucleotide sequences (all positive reading frames) to detect domain matches in the PFAM, SMART and Panther databases. Outputs are provided in a variety of formats for downstream analysis.
+**Description:** This directory contains the intermediate and final outputs for Open Reading Frame (ORF) prediction. The pipeline employs a multi-tool approach—integrating CPAT, GeneMark-ST (GMST), and TransDecoder—to identify coding sequences within the transcript isoforms. It includes coordinate conversions (GTF to BED/GFF), sequence extraction, and homology-based evidence (Pfam/UniRef) to refine ORF calls.
+
+**Contents:**
+
+- **`{prefix}_ORFpred-input.fasta`**: The strand-specific transcript sequences extracted from the reference genome, used as the primary input for all ORF prediction engines.
+- **`{prefix}_ORFpred-input.bed` / `.gff`**: Transcripts converted into BED12 and GFF formats to facilitate coordinate-aware ORF searching.
+- **`cpat_leng/`**: Contains CPAT v3 results, focusing on the "best-hit by length" logic to identify coding potential based on sequence features.
+  - `{prefix}_corrected.cpatv3l18.ORF_prob.best.tsv`: The top-scoring ORF candidates per transcript.
+- **`gmst/`**: Contains GeneMark-ST predictions, processed in parallel chunks for efficiency.
+  - **`merged/`**: Consolidated GMST outputs including protein sequences (`.faa`), coding sequences (`.fnn`), and structural annotations (`.gff3`).
+- **`transdecoder/`**: Contains the results of the TransDecoder pipeline, which integrates intrinsic sequence properties with external homology evidence.
+  - **`global_model/`**: The trained Markov model based on the longest ORFs found in the dataset.
+  - **`merged/`**: The final high-confidence ORF predictions (`.pep`, `.cds`, `.gff3`, `.bed`) after filtering through Pfam domain searches (via `hmmscan`) and UniRef90 protein similarity (via `diamond`).
 
 
-### 07_pfam
-This task runs [pfamscan](https://www.ebi.ac.uk/Tools/pfa/pfamscan/) on all isoform nucleotide sequences (all positive reading frames) to detect domain matches in the PFAM database. Outputs are provided in a variety of formats for downstream analysis.
 
-### 08_genomic_element_overlaps
-This task overlaps the exons or coding sequences (CDS) with various types of genomic elements and returns the number of isoform bases that overlap each element. The output is a single tab-delimited text file with isoform IDs in the first column, followed by columns for each element and the number of overlapping bases. Overlaps with the following elements are reported in the file `{prefix}_genomic_element_overlaps.txt`:
+### 03_annotation
 
-* overlap_segdups (at isoform exon- and CDS-level)
-* overlap_repeatmasker (at isoform exon- and CDS-level)
-* overlap_SINE-LINE-LTR (at isoform exon- and CDS-level)
-* overlap_ultraconserved (at isoform exon- and CDS-level)
-* overlap_phyloCSF_novel_v31 (at isoform exon- and CDS-level)
-* overlap_phyloCSF_novel_v35 (at isoform exon- and CDS-level)
+**Description:** This directory contains the functional annotation and structural refinement of the isoforms. It uses isoPropeller to compare assembled transcripts against a reference, reconstructs genomic loci to handle fusion genes, and integrates the ORF predictions from Step 02 to finalize the coding sequence (CDS) for each transcript.
 
-In addition, this task also overlaps isoforms with common structural variants (Deletions (DEL), Duplications (DUP), or other combinations (OTH), in Europeans (eur), or all ancestries at different allele frequencies (AF: 0.0001, 0.005, or 0.01). The number of isoform bases (exon level) overlapping each category of structural variants is reported in the file `{prefix}_SV_overlaps.txt`.
+#### subdir/01_annot (Annotation)
 
-### 09_niap
-This task compares all isoforms with all isoforms from the reference and annotates them. The `{prefix}.gtf` is comparee with the reference, which will then generates the `{prefix}_reference.gtf` file. The `{prefix}_reference.gtf` file contains the annoated information, which will be extracted and output to `{prefix}_reference.txt` containing the following columns.
+- **`{prefix}_reference.gtf`**: The initial annotation of isoforms against the reference genome, categorizing them relative to known gene models.
+- **`{prefix}_reference_transcript.txt`**: A comprehensive summary table containing gene names, types, and reference IDs for every detected isoform.
 
-* transcript_id: The transcript ID
-* gene_id: The gene ID after annotation (The `|` indicates the concatenation of gene IDs forming fusion isoform in the order of 5' -> 3')
-* chr: The chromosome
-* strand: The strand of the isoform
-* left: The left-most position of the isoform
-* right: The right-most position of the isoform
-* exon: The number of exons in the isoform
-* length: The length of the isoform
-* fraction_downstream_A: The fraction of As downstream of the 3' end in a 20 bp window
-* length_downstream_A: The maximal length of As downstream of the 3' end in a 20 bp window
-* gc_content: % GC of the isoform 
-* asm_gene_id: The gene ID shown in `{prefix}_merged.gtf`
-* gene_name: The gene name corresponding to gene_id
-* gene_type: The gene type corresponding to gene_id
-* ref_gene_id: The gene ID of novel gene associated gene(s) in the reference
-* ref_transcript_id: The transcript ID of the most similar reference isoform
-* status: The classifcation tag
+#### subdir/02_reclocus (Locus Reconstruction)
 
-An additional output file is generated with isoform-level classification information named `{prefix}_reference_refined.txt` , containing the following columns:
+- **`{prefix}_reference_reclocus.gtf`**: Refined transcript models where genomic loci have been reconstructed to better account for fusion genes and complex overlaps.
+- **`{prefix}_fusion_gene_ratio.txt`**: Quantitative metrics used to identify and characterize fusion events and monoexonic gene structures.
+- **`{prefix}_reference_reclocus_transcript.txt`**: Summary statistics specifically for the reconstructed locus models, including "reconstructed_locus" tags.
 
-- transcript_id : The transcript ID
-- status: The isoform status as classified by isoPropeller
-- isoPropeller_structural_category: The isform structural category
-- isoPropeller_structural_subcategory: The isoform structural subcategory
+#### subdir/03_cds (Coding Sequence Integration)
 
-### 10_nmd_poison_exons
-This task identifies isoforms that are likely targets for nonsense-mediated decay (NMD) as well as poison exons. Poison exons are naturally occurring, highly conserved alternative exons that contain a premature termination codon. Inclusion of a poison exon in a transcript targets the transcript for NMD, decreasing the amount of protein produced. 
+- **`{prefix}_reference_reclocus_CDS.gtf`**: The final structural GTF file. It integrates the best-performing ORF prediction (selected from GMST, CPAT, and TransDecoder) into the reconstructed transcript models.
+- **`{prefix}_reference_reclocus_CDS_aa.fa`**: The final amino acid sequences for all predicted ORFs, with terminal stop codons removed for compatibility with downstream functional tools.
+- **`{prefix}_reference_reclocus_CDS_transcript.txt`**: A detailed table including CDS support, TIS (Translation Initiation Site) efficiency, and NMD (Nonsense-Mediated Decay) status.
 
-### 11_transdecoder
-This task runs a [transdecoder](https://github.com/TransDecoder/TransDecoder/wiki) analysis to identify candidate open reading frames (ORFs) within isoform sequences. In the first stage of the analysis it extracts all long ORFs per transcript above a certain threshold (defined in `config.yaml` and set to 100 amino acids by default). In the second stage [diamond blast](https://github.com/bbuchfink/diamond) and [pfamscan](https://www.ebi.ac.uk/Tools/pfa/pfamscan/) are run for each ORF to identify known domains and blast hits to [uniref90](https://www.uniprot.org/help/uniref). In the final step transdecoder predicts the likely coding regions, retaining ORFs with homology to known proteins (identified by diamond blast) or known protein domains (identified by pfamscan). Outputs are generated in bed, gff3 and pep formats.
+#### subdir/04_asef (Alternative Splicing & Exon Features)
 
-### 12_tracks	
+- **`{prefix}_reference_reclocus_CDS_NE_exon.gtf`**: Identifies **Novel Exons (NE)** not found in the reference annotation.
+- **`{prefix}_reference_reclocus_CDS_NCE_cds.gtf`**: Specifically highlights **Novel Coding Exons (NCE)** that alter the protein-coding potential.
+- **`{prefix}_reference_reclocus_CDS_NE_cds.txt`**: A comparison file mapping novel coding segments to their respective structural exons.
 
-This task produces an extended GTF track file `{prefix}_patched_extra_stopfix.gtf` for squanti_patched isoforms (task 02). The CDS records in this GTF file have been modified to exclude the stop codon to ensure the file is compatible with `IsoswitchAnalyzeR`. The GTF file also contains the following extra attributes that are needed for e.g. a VEP analysis:
+#### subdir/05_final (Refined Classifications)
 
-* transcript_id: The unique PBID assigned to the transcript
-* gene_id: The associated gene ID(s) assigned by isoPropeller. If multiple gene IDs are assigned to the same isoform they are separated by ':' (e.g. ENSG01:ENSG02)
-* gene_name: The associated gene name(s) assigned by isoPropeller. If multiple gene names are assigned to the same isoform they are separated by ':' (e.g. geneA:geneB)
-* gene_biotype: The assigned gene biotypes(s) derived from the associated gene ID(s). If multiple biotypes are assigned to the same isoform they are assigned
-* isoPropeller_structural_category: The structural category assigned by isoPropeller.
-* isoPropeller_structural_subcategory: The structural subcategory assigned by isoPropeller.
-* cds_type: The CDS type assigned by isoPropeller.
+- **`{prefix}_reference_reclocus_refined.txt`**: The "master" classification table. It merges isoPropeller structural categories with ASEF alternative splicing data to provide a final, high-confidence call for each transcript (e.g., FSM, ISM, NIC, NNC).
 
-Finally, the 12_tracks folder also contains per-sample tracks that are derived from the main  `{prefix}_patched_extra_stopfix.gtf` file after restricting to isoforms present in each sample. The selection is done by selecting isoforms with a count greater than zero in the flcount matrix (task 03).
+#### subdir/06_poison_exon (NMD Analysis)
 
-### 13_splicechains	
+- **`{prefix}_nmd_sj_parsed.txt`**: Identifies "Poison Exons"—alternative exons that introduce a premature termination codon (PTC) and likely trigger Nonsense-Mediated Decay, based on the 50-55nt rule relative to downstream splice junctions.
 
-This task produces a file with unique splice chains derived from the patched sqanti gtf/bed files. A splicechain is a unique chain of donor/acceptor sites that can be used to compare isoforms based on splice events only, ignoring any differences that may exist in 5' and/or 3' exon lengths.
+
+
+### 04_functional_annotation
+
+**Description:** This folder contains the results of comprehensive protein domain and motif searches. To handle the computational load of analyzing thousands of isoforms, the protein sequences are split into smaller chunks, processed in parallel using **InterProScan** and **PfamScan**, and then consolidated into final master reports.
+
+#### subdir/interproscan/
+
+High-level functional characterization using the InterPro database. This tool scans protein sequences against multiple signatures (e.g., Pfam, SUPERFAMILY, MobiDBLite) and provides GO terms and pathway information.
+
+- **`chunks/`**: Temporary subsets of the amino acid FASTA used for parallelization.
+- **`predicted/`**: Raw output chunks in TSV, GFF3, and XML formats.
+- **`merged/`**:
+  - **`{prefix}.tsv`**: A tab-delimited file mapping isoforms to protein families, domains, and functional sites.
+  - **`{prefix}.gff3`**: Structural representation of the protein matches.
+  - **`{prefix}.xml`**: A complete, aggregated XML record of all protein matches, reconstructed with proper header/footer tags for downstream XML parsers.
+
+#### subdir/pfamscan/
+
+Dedicated domain annotation using the Pfam-A database via `pfam_scan.pl`. This provides a more focused search for conserved protein families using HMMER-based models.
+
+- **`chunks/`**: Temporary subsets of the amino acid FASTA.
+- **`predicted/`**: Raw output chunks containing Pfam domain hits.
+- **`merged/`**:
+  - **`{prefix}.pfam.txt`**: The final aggregated Pfam report. It includes significant hits and their corresponding E-values or Gathering Thresholds (GA), with the original Pfam metadata headers preserved.
+
+
+
+### 05_genomic_element_overlaps
+
+**Description:** This folder contains analysis of how the final reconstructed isoforms overlap with a diverse set of genomic elements. These overlaps are used to annotate isoforms with evolutionary information (PhyloCSF), repeat content (RepeatMasker), and potential impacts from Structural Variants (SVs).
+
+**Contents:**
+
+- **`{prefix}_genomic_element_overlaps.txt`**: A comprehensive master table summarizing intersections with several key genomic features, including:
+  - **RepeatMasker (RMSK)**: Identification of transcripts overlapping with transposable elements or low-complexity repeats.
+  - **Ultraconserved Elements**: Overlaps with highly conserved genomic regions.
+  - **PhyloCSF (v31 & v35)**: Comparative genomics data indicating the likelihood that a region is a conserved coding sequence across species.
+  - **Segmental Duplications**: Identification of transcripts residing within highly repetitive/duplicated regions of the genome.
+- **`{prefix}_SV_overlaps.txt`**: A specialized report focusing on Structural Variant (SV) context. It maps isoforms against control and non-neutral SV datasets to identify transcript structures potentially altered or created by genomic rearrangements.
+
+
+
+### 06_tracks
+
+**Description:** This directory contains the finalized transcript models in a variety of track formats. It decorates the structural GTF with rich metadata (biotypes, structural categories, and CDS info) and generates per-sample and per-group track files (GTF and BED) for use in genome browsers like IGV or UCSC.
+
+**Contents:**
+
+- **`{prefix}_reference_reclocus_CDS_extra.gtf`**: The master annotation file. It includes the standard structural information plus additional custom attributes:
+  - `gene_biotype`: Protein-coding, lncRNA, etc.
+  - `niap_structural_category`: The high-level classification (e.g., FSM, ISM, NIC, NNC).
+  - `niap_structural_subcategory`: Detailed isoform features (e.g., mono-exon, multi-exon).
+  - `cds_type`: Classification of the predicted coding sequence.
+  - `exon_number`: Explicit ranking of exons (1, 2, 3...) based on strand orientation.
+- **`{prefix}_patched_extra_stopfix.gtf`**: A "clean" version of the master GTF where stop codons have been removed from the CDS features to ensure compatibility with certain downstream functional tools and databases.
+- **`{prefix}_sample_\*.gtf.gz` / `.bed`**: Individual track files for every sample in your dataset. The BED files are specially formatted to use the isoform count (expression level) as the "score" field, allowing for visual intensity scaling in browsers.
+- **`{prefix}_group_\*.gtf.gz` / `.bed`**: Aggregated track files based on the groups defined in your `trackgroups` file. These files sum the counts across all samples in a group to represent collective expression.
+
+
+
+#### 07_splicechains
+
+**Description:** This directory contains the coordinate-based string representations of every transcript's splicing pattern. By converting isoforms into unique splice chains, the pipeline can easily identify transcripts that share identical intron-exon structures, regardless of their transcript or gene IDs.
+
+**Contents:**
+
+- **`{prefix}_splicechains.txt`**: A sorted text file where each line represents a transcript's unique splicing signature.
+  - **Structure:** These chains typically consist of a sequence of genomic coordinates for all splice junctions within a transcript.
+  - **Usage:** This output is critical for deduplicating transcripts across different samples, comparing assemblies to reference annotations, and identifying exactly matching isoforms in complex genomic regions.
+
+
+
+### 08_DEG
+
+**Description:** This folder contains the results of differential expression analysis and correlation studies. By integrating the isoform count matrix with detailed metadata and experimental designs, the pipeline identifies transcripts that are significantly regulated across different conditions, tissues, or experimental contrasts.
+
+**Contents:**
+
+- **`{prefix}_limma.checkpoint`**: A sentinel file indicating the successful completion of the `limma` analysis suite.
+- **Differential Expression Reports**: (Generated by the script) Statistical tables typically including log-fold changes, p-values, and adjusted p-values (FDR) for each transcript across the provided experimental contrasts.
+- **Tissue-Specific Highlights**: Analysis refined by the `exp_highlight_file`, specifically focusing on the expression patterns of brain-tissue-specific genes within your isoform dataset.
+- **Correlation Matrices**: Statistical outputs mapping the relationships between isoform expression levels and the variables defined in your experimental models.
+
+
+
+### 09_collapsed-ORFs
+
+**Description:** This folder contains collapsed and clustered amino acid sequences derived from the final ORF predictions. Because multiple transcript isoforms can encode identical or highly similar protein sequences, this step uses clustering (via **CD-HIT**) to group redundant proteins, providing a non-redundant search space for mass spectrometry analysis.
+
+**Contents:**
+
+- **`{prefix}_reference_reclocus_CDS_aa_clust_header_generic.faa`**: The primary non-redundant protein FASTA file.
+  - **Clustering:** Identical protein sequences are collapsed into single representative entries.
+  - **Header Formatting:** Headers are standardized to a generic format to ensure compatibility with various mass spectrometry search engines (like MaxQuant or FragPipe).
+- **Mass-Spec Ready Files**: Additional subsets of ORFs, including "all" (complete set), "clust" (representative sequences), and "clust_contained" (mapping of which isoforms belong to which cluster), providing a bridge between the transcriptome and the proteome.
+
+
+
+### 10_isoformswitchanalyzer_inputs
+
+**Description:** This folder contains a synchronized set of expression, structural, and functional files. The pipeline filters and renames data from previous steps (counts, ORFs, CPAT scores, and Pfam domains) to ensure they meet the input requirements for analyzing isoform switches and their potential impact on protein domains using the IsoformSwitchAnalyzeR R package.
+
+**Contents:**
+
+- **`{prefix}_exp_counts.txt` / `_exp_TPM.txt`**: Count and abundance matrices filtered to include only those isoforms meeting the minimum count threshold for statistical reliability.
+- **`{prefix}_exp_annots.gtf`**: The structural annotation (from the "stopfix" patched GTF) used to define transcript structures and exon coordinates.
+- **`{prefix}_exp_design.txt`**: A design matrix mapping samples to experimental groups based on the provided trackgroups.
+- **`{prefix}_exp_cpat3.txt`**: Coding potential scores formatted specifically for IsoformSwitchAnalyzeR to evaluate if switches occur between coding and non-coding isoforms.
+- **`{prefix}_exp_isoforms.faa` / `-nt.fasta`**: The amino acid and nucleotide sequences of the isoforms, used by the analyzer to predict signal peptides or other sequence-based features.
+
+
+
+### 11_pogo
+
+**Description:** This directory facilitates the proteogenomic validation of the transcript isoforms. The rules within specifically format the predicted protein sequences and their corresponding genomic locations to allow for the precise mapping of experimental mass-spec peptide data back to the genome.
+
+**Contents:**
+
+- **`{prefix}_PoGo_input.fasta`**: A re-formatted protein FASTA file where headers are specifically structured (`>transcript:ID gene:ID`) to allow PoGo to link peptide sequences back to the correct transcript and gene models.
+- **`{prefix}_PoGo_input.gtf`**: The coordinate-accurate GTF (derived from the "stopfix" patch) used by PoGo to resolve peptide locations across splice junctions.
+- **`{prefix}_PoGo_mm0.txt` / `_mm1.txt`**: Copies of the original peptide list used for iterative mapping attempts.
+- **`{prefix}_PoGo_mm1_1MM.bed`**: The final mapping result. By running at multiple mismatch thresholds (0 and 1), the pipeline provides a refined view of peptide support, where the resulting BED file shows the exact genomic coordinates of physical protein evidence.
+
+
+
+### 12_plots
+
+**Description:** This folder contains the final graphical summaries and statistical tables of the isoform analysis. By integrating structural classifications, expression counts, and biotype data, these plots provide a global view of gene and isoform diversity, allowing for rapid assessment of the pipeline's findings.
+
+**Contents:**
+
+- **`{prefix}_gene-isoform-read_stats.txt`**: A master statistics table summarizing the total number of genes, isoforms, and reads processed across the various classification tiers.
+- **`{prefix}_genes-isoforms-reads_by_biotype.svg/pdf`**: Visual breakdowns showing the distribution of data across different genomic biotypes (e.g., protein-coding, lncRNA, antisense).
+- **`{prefix}_genes-isoforms-reads_by_supercategory.svg/pdf`**: Plots categorizing transcripts into major structural groups such as Full Splice Match (FSM), Incomplete Splice Match (ISM), Novel in Catalog (NIC), and Novel Not in Catalog (NNC).
+- **`{prefix}_isoform-expression-ranking.svg/pdf`**: A cumulative or ranked visualization showing the dynamic range of isoform expression, helping to distinguish dominant isoforms from low-abundance transcripts.
+- **`{prefix}_isoform-stats-breakdown.svg/pdf`**: Detailed multi-panel plots that visualize various isoform-level metrics, providing a "health check" and summary of the entire transcriptome reconstruction.
+
+
+
+### 13_augmented-reference
+
+**Description:** This folder contains an "augmented" version of the reference genome annotation. It combines the original reference GTF with new transcripts identified by isoPropeller, while removing redundant reference isoforms that share identical splice chains isoPropeller transcripts. This results in a non-redundant, expanded reference suitable for downstream alignment or quantification.
+
+**Contents:**
+
+- **`{prefix}_reference_im_reclocus.gtf`**: A combined GTF file containing both reference and novel transcript models from the reconstructed locus step.
+- **`{prefix}_reference_im_reclocus_splicechains.gtf`**: A refined, non-redundant version of the augmented reference.
+  - **Splice Chain Filtering:** This file is generated by identifying every transcript's unique intron-exon junction sequence (splice chain).
+  - **Redundancy Removal:** Any original reference isoform that is an exact structural match to a novel isoPropeller transcript is dropped, ensuring that each unique splicing pattern is represented only once in the final annotation.
+
+
+
+### 14_sqanti
+
+**Description:** This optional directory contains quality control plots of the isoforms using the SQANTI3 package, which characterizes transcripts through integration with orthogonal data such as **CAGE peaks** (for 5' end validation), **PolyA motifs/peaks** (for 3' end validation), and **intron coverage** (for splice junction support).
+
+**Contents:**
+
+- **`{prefix}_SQANTI3_report.pdf`**: A multi-page visual report providing a detailed breakdown of the transcriptome. It includes metrics on transcript length, distance to TSS/TTS, and the distribution of structural categories (FSM, ISM, NIC, NNC, etc.).
