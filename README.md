@@ -1,6 +1,15 @@
 ## isoPropeller-annotate
 
-Snakemake pipeline to annotate isoforms identified by the isoPropeller-collapse pipeline. The starting point for the pipeline is a `.gtf` isoform file, and an `isoform count matrix` with the raw read counts for each isoform (rows) in all samples (columns).
+**isoPropeller-annotate** is a Snakemake pipeline for the structural classification, functional annotation, and analysis of long-read transcript isoforms. It is specifically designed for the **isoPropeller** suite to further annotate the outputs  [isoPropeller-collapse](https://github.com/PintolabMSSM/isoPropeller-collapse), but it can also take inputs from other isoform discovery tools.
+
+The workflow automates the following steps:
+
+- **Classification:** Categorizing transcripts against reference models (e.g., FSM, ISM, NIC, NNC) and reconstructing loci to resolve complex gene overlaps.
+- **Coding Potential assessment:** Integrating multiple ORF prediction engines ([GeneMark-ST](https://exon.gatech.edu/), [CPAT](https://github.com/liguowang/cpat), [TransDecoder](https://github.com/TransDecoder/TransDecoder)) with homology evidence ([Pfam](http://pfam.xfam.org/), [InterPro](https://www.ebi.ac.uk/interpro/)).
+- **Splicing & Feature Analysis:** Analysis of novel exons, NMD-triggering "poison" exons, and alternative splicing events, using our [isoPropeller](https://github.com/PintolabMSSM/isoPropeller) tool.
+- **Functional characterization:** Running parallelized [InterPro](https://www.ebi.ac.uk/interpro/) and [Pfam](http://pfam.xfam.org/),  searches to assign protein domains and GO terms.
+- **Proteogenomic Validation:** Mapping mass-spectrometry peptides back to genomic coordinates using [PoGo](https://www.sanger.ac.uk/tool/pogo/) for supporting evidence of translation.
+- **Differential Expression:** Providing analysis files for further assessments of isoform usage and switching across experimental conditions.
 
 
 
