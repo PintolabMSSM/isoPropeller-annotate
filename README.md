@@ -5,7 +5,7 @@
 The workflow automates the following steps:
 
 - **Classification:** Categorizing transcripts against reference models (e.g., FSM, ISM, NIC, NNC) and reconstructing loci to resolve complex gene overlaps.
-- **Coding Potential assessment:** Integrating multiple ORF prediction engines ([GeneMark-ST](https://exon.gatech.edu/), [CPAT](https://github.com/liguowang/cpat), [TransDecoder](https://github.com/TransDecoder/TransDecoder)) with homology evidence ([Pfam](http://pfam.xfam.org/), [InterPro](https://www.ebi.ac.uk/interpro/)).
+- **Coding Potential assessment:** Integrating multiple ORF prediction engines ([CPAT](https://github.com/liguowang/cpat), [GeneMark-ST](https://exon.gatech.edu/), [TransDecoder](https://github.com/TransDecoder/TransDecoder)) with homology evidence ([Pfam](http://pfam.xfam.org/), [InterPro](https://www.ebi.ac.uk/interpro/)).
 - **Splicing & Feature Analysis:** Analysis of novel exons, NMD-triggering "poison" exons, and alternative splicing events, using our [isoPropeller](https://github.com/PintolabMSSM/isoPropeller) tool.
 - **Functional characterization:** Running parallelized [InterPro](https://www.ebi.ac.uk/interpro/) and [Pfam](http://pfam.xfam.org/),  searches to assign protein domains and GO terms.
 - **Proteogenomic Validation:** Mapping mass-spectrometry peptides back to genomic coordinates using [PoGo](https://www.sanger.ac.uk/tool/pogo/) for supporting evidence of translation.
