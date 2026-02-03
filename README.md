@@ -1,6 +1,10 @@
+[![Snakemake](https://img.shields.io/badge/workflow-snakemake-90EE90.svg?style=flat-square)](https://snakemake.github.io)
+![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg?logo=python&logoColor=white)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/PintolabMSSM/isoPropeller/blob/main/LICENSE)
+
 ## isoPropeller-annotate
 
-**isoPropeller-annotate** is a Snakemake pipeline for the structural classification, functional annotation, and analysis of long-read transcript isoforms. It is specifically designed for the **isoPropeller** suite to further annotate the outputs  [isoPropeller-collapse](https://github.com/PintolabMSSM/isoPropeller-collapse), but it can also take inputs from other isoform discovery tools.
+**isoPropeller-annotate** is a Snakemake pipeline for the structural classification, functional annotation, and analysis of long-read RNA isoforms. It is specifically designed for the **isoPropeller** suite to further annotate the outputs of [isoPropeller-collapse](https://github.com/PintolabMSSM/isoPropeller-collapse), but it can also take inputs from other isoform discovery tools.
 
 The workflow automates the following steps:
 
@@ -8,8 +12,8 @@ The workflow automates the following steps:
 - **Coding Potential assessment:** Integrating multiple ORF prediction engines ([CPAT](https://github.com/liguowang/cpat), [GeneMark-ST](https://exon.gatech.edu/), [TransDecoder](https://github.com/TransDecoder/TransDecoder)) with homology evidence ([Pfam](http://pfam.xfam.org/), [InterPro](https://www.ebi.ac.uk/interpro/)).
 - **Splicing & Feature Analysis:** Analysis of novel exons, NMD-triggering "poison" exons, and alternative splicing events, using our [isoPropeller](https://github.com/PintolabMSSM/isoPropeller) tool.
 - **Functional characterization:** Running parallelized [InterPro](https://www.ebi.ac.uk/interpro/) and [Pfam](http://pfam.xfam.org/),  searches to assign protein domains and GO terms.
-- **Proteogenomic Validation:** Mapping mass-spectrometry peptides back to genomic coordinates using [PoGo](https://www.sanger.ac.uk/tool/pogo/) for supporting evidence of translation.
-- **Differential Expression:** Providing analysis files for further assessments of isoform usage and switching across experimental conditions.
+- **Proteogenomic characterization:** Mapping mass-spectrometry peptides back to genomic coordinates using [PoGo](https://www.sanger.ac.uk/tool/pogo/) for supporting evidence of translation.
+- **Differential expression:** Providing analysis files for further assessments of RNA isoform expression and usage across experimental conditions.
 
 
 
@@ -317,3 +321,16 @@ Dedicated domain annotation using the Pfam-A database via `pfam_scan.pl`. This p
 **Contents:**
 
 - **`{prefix}_SQANTI3_report.pdf`**: A multi-page visual report providing a detailed breakdown of the transcriptome. It includes metrics on transcript length, distance to TSS/TTS, and the distribution of structural categories (FSM, ISM, NIC, NNC, etc.).
+
+
+## Contributors
+The IsoPropeller core tools and snakemake workflows are developped and maintained by [Xiao Lin](https://github.com/alanlamsiu), [Yoav Hadas](https://github.com/yoavhadas), and [Dalila Pinto](https://github.com/ddpinto) at the Icahn School of Medicine at Mount Sinai.
+If you want to contribute, please leave an issue. Thank you.
+
+The source code is available under the GPL3.0 license.
+
+## Citation
+The paper describing isoPropeller is in preparation. Stay tuned!
+
+## Feedback and bug reports
+We welcome your comments, bug reports, and suggestions. They will help us to further improve IsoPropeller. You may submit feedback and bug reports through our GitHub repository issue tracker.
