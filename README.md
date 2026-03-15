@@ -1,5 +1,9 @@
 ## isoPropeller-annotate
 
+<div>
+<img align="left" src="docs/images/IsoPropeller_logo.png" alt="IsoPropeller Logo" width="150">
+</div>
+
 **isoPropeller-annotate** is a Snakemake pipeline for the structural classification, functional annotation, and analysis of long-read transcript isoforms. It is specifically designed for the **isoPropeller** suite to further annotate the outputs  [isoPropeller-collapse](https://github.com/PintolabMSSM/isoPropeller-collapse), but it can also take inputs from other isoform discovery tools.
 
 The workflow automates the following steps:
