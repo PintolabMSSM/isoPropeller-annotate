@@ -20,7 +20,7 @@ rule run_sqanti3:
     log:
         "logs/14_sqanti/{prefix}.log"
     container:
-        "docker://anaconesalab/sqanti3:latest"
+        "docker://anaconesalab/sqanti3:v5.5.4"
     shell:
         r'''
         (
