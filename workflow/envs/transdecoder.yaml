@@ -3,7 +3,7 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - transdecoder >=5.5.0
+  - transdecoder =5.7.1
   - hmmer >=3.3.2
   - blast >=2.13.0
   - diamond =2.1.12
