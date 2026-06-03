@@ -41,7 +41,6 @@ rule run_sqanti3:
             echo "Using Script: $SQANTI_SCRIPT"
 
             python $SQANTI_SCRIPT \
-                --force_id_ignore \
                 --isoforms         "{input.isop_gtf}" \
                 --refGTF           "{input.refgenome_gtf}" \
                 --refFasta         "{input.refgenome_fasta}" \
